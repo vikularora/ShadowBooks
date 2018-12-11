@@ -72,43 +72,42 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	private String formatDeliveryAddress(Address address) {
-		return address.getHouseNumber() +" "+ address.getStreet() +" "+ address.getArea() +" "+ address.getLandmark();
+		return address.getHouseNumber() + " " + address.getStreet() + " " + address.getArea() + " "
+				+ address.getLandmark();
 	}
 
 	@Override
 	public Optional<Order> updateOrderStatus(Order order) {
 		Optional<Order> optionalOrder = orderRepository.findById(order.getId());
-		Order fetchedorder =null;
+		Order fetchedorder = null;
 		if (optionalOrder.isPresent()) {
-			 fetchedorder = optionalOrder.get();
+			fetchedorder = optionalOrder.get();
 			fetchedorder.setStatus(order.getStatus());
-			fetchedorder	=	orderRepository.save(fetchedorder);
+			fetchedorder = orderRepository.save(fetchedorder);
 		}
-		
+
 		return Optional.ofNullable(fetchedorder);
 	}
 
 	@Override
 	public List<Order> findOrdersByUserId(long userId) {
-		
-		return orderRepository.findByUserIdStatusNotInIgnoreCase(userId,"CANCELLED");		
+
+		return orderRepository.findByUserIdStatusNotInIgnoreCase(userId, "CANCELLED");
 
 	}
 
 	@Override
 	public List<LineItem> findOrderById(long orderId) {
-		
-		
+
 		List<LineItem> orderedItems = lineItemRepository.findByOrderId(orderId);
-		orderedItems.forEach(orderedItem->{
+		orderedItems.forEach(orderedItem -> {
 			Optional<Item> optItem = itemRepository.findById(orderedItem.getProductId());
 			orderedItem.setName(optItem.get().getName());
 			orderedItem.setLanguage(optItem.get().getLanguage());
 			orderedItem.setPicture(optItem.get().getPicture());
 		});
 		return orderedItems;
-		
-		
+
 	}
 
 	@Override
