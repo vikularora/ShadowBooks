@@ -7,14 +7,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @Entity
-@SQLDelete(sql = "update item set deleted = true where id=?")
+@Table(name="orders")
+@SQLDelete(sql = "update orders set deleted = true where id=?")
 @Where(clause = "deleted=false")
-public class Orders implements Serializable {
+public class Order implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,8 +26,9 @@ public class Orders implements Serializable {
 	private Long userId;
 	private String address;
 	private Long contactNo;
+	private Double totalAmount;
 	private String status;
-
+	
 	private boolean deleted;
 	@Column(updatable = false)
 	private long createdOn;
@@ -95,11 +98,19 @@ public class Orders implements Serializable {
 		this.status = status;
 	}
 
+	public Double getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(Double totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
 	@Override
 	public String toString() {
 		return "Orders [id=" + id + ", userId=" + userId + ", address=" + address + ", contactNo=" + contactNo
-				+ ", status=" + status + ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn="
-				+ modifiedOn + "]";
+				+ ", totalAmount=" + totalAmount + ", status=" + status + ", deleted=" + deleted + ", createdOn="
+				+ createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

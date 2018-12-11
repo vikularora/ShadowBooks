@@ -1,9 +1,13 @@
 package com.shadow.books.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.shadow.books.domain.Orders;
+import com.shadow.books.domain.Order;
 
-public interface OrderRepository extends JpaRepository<Orders, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
+
+	List<Order> findByUserIdStatusNotInIgnoreCase(long userId, String status);
 
 }

@@ -10,6 +10,6 @@ import com.shadow.books.domain.Item;
 @Repository
 public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
 
-	Page<Item> findByCategoryAndLanguage(String category, String language, Pageable pageable);
+	Page<Item> findByCategoryAndLanguageAllIgnoreCase(String category, String language, Pageable pageable);
 
 }

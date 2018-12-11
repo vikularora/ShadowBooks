@@ -1,5 +1,7 @@
 package com.shadow.books.api;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -56,8 +58,24 @@ public class ItemApi {
 		return new ResponseEntity<Item>(item, HttpStatus.NOT_MODIFIED);
 	}
 
+	@GetMapping("category/{cat}")
+	private ResponseEntity<Map<String, List<Item>>> listByCategory(
+			@PathVariable(name = "cat", required = true) String cat,
+			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
+			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		Map<String, List<Item>> itemsMap = itemService.listByCategoryGroupByLanguage(cat, pageable);
+
+		if (itemsMap.isEmpty()) {
+			return new ResponseEntity<Map<String, List<Item>>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<Map<String, List<Item>>>(itemsMap, HttpStatus.OK);
+	}
+
 	@GetMapping("list")
-	private ResponseEntity<Page<Item>> list(@RequestParam(name = "category", required = true) String category,
+	private ResponseEntity<Page<Item>> listByCategoryAndLanguage(
+			@RequestParam(name = "category", required = true) String category,
 			@RequestParam(name = "language", required = true) String language,
 			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {

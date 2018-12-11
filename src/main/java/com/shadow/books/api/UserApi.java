@@ -1,5 +1,6 @@
 package com.shadow.books.api;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shadow.books.domain.Order;
 import com.shadow.books.domain.User;
+import com.shadow.books.service.OrderService;
 import com.shadow.books.service.UserService;
 
 @RestController
@@ -29,17 +32,22 @@ public class UserApi {
 	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Autowired
+	OrderService orderService;
+
+	@Autowired
 	private UserService userService;
 
 	@CrossOrigin
 	@PostMapping("add")
 	public ResponseEntity<User> add(@RequestBody User user) throws Exception {
-		User result = userService.add(user);
+		user = userService.add(user);
 
-		if (result != null) {
-			return new ResponseEntity<User>(result, HttpStatus.CREATED);
+		if (user != null) {
+			logger.info("USER NOT NULL:: " + user);
+			return new ResponseEntity<User>(user, HttpStatus.CREATED);
 		}
-		return new ResponseEntity<User>(result, HttpStatus.NO_CONTENT);
+		logger.info("NULLA USER :: " + user);
+		return new ResponseEntity<User>(user, HttpStatus.NO_CONTENT);
 	}
 
 	@CrossOrigin
@@ -85,6 +93,17 @@ public class UserApi {
 	@DeleteMapping("delete/{id}")
 	public void delete(@PathVariable(name = "id", required = true) Long id) throws Exception {
 		userService.delete(id);
+	}
+
+	@GetMapping("{userId}/orders")
+	public ResponseEntity<List<Order>> orderByUserId(@PathVariable("userId") long userId) {
+
+		List<Order> orders = orderService.findOrdersByUserId(userId);
+		if (orders.isEmpty()) {
+			return new ResponseEntity<List<Order>>(orders, HttpStatus.OK);
+		}
+		return new ResponseEntity<List<Order>>(orders, HttpStatus.NOT_MODIFIED);
+
 	}
 
 }

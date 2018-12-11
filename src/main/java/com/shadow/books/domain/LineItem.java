@@ -23,7 +23,7 @@ public class LineItem {
 	private Long userId;
 	private Long productId;
 	private Long quantity;
-	private Float price;
+	private Float unitPrice;
 //	private Float discount;
 	private Float amount;
 	private String status;
@@ -55,10 +55,6 @@ public class LineItem {
 
 	public Long getQuantity() {
 		return quantity;
-	}
-
-	public Float getPrice() {
-		return price;
 	}
 
 	public Float getAmount() {
@@ -95,10 +91,6 @@ public class LineItem {
 
 	public void setQuantity(Long quantity) {
 		this.quantity = quantity;
-	}
-
-	public void setPrice(Float price) {
-		this.price = price;
 	}
 
 	public void setAmount(Float amount) {
@@ -153,12 +145,20 @@ public class LineItem {
 		this.orderId = orderId;
 	}
 
+	public Float getUnitPrice() {
+		return unitPrice;
+	}
+
+	public void setUnitPrice(Float unitPrice) {
+		this.unitPrice = unitPrice;
+	}
+
 	@Override
 	public String toString() {
 		return "LineItem [id=" + id + ", userId=" + userId + ", productId=" + productId + ", quantity=" + quantity
-				+ ", price=" + price + ", amount=" + amount + ", status=" + status + ", orderId=" + orderId + ", name="
-				+ name + ", language=" + language + ", picture=" + Arrays.toString(picture) + ", deleted=" + deleted
-				+ ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+				+ ", unitPrice=" + unitPrice + ", amount=" + amount + ", status=" + status + ", orderId=" + orderId
+				+ ", name=" + name + ", language=" + language + ", picture=" + Arrays.toString(picture) + ", deleted="
+				+ deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

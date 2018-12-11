@@ -1,9 +1,16 @@
 package com.shadow.books.service.impl;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +26,7 @@ public class ItemServiceImpl implements ItemService {
 
 	@Autowired
 	ItemRepository itemRepository;
+	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Override
 	public Item add(Item inventory) {
@@ -48,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
 	public Optional<Item> finById(Long id) {
 		Optional<Item> optItem = itemRepository.findById(id);
 		if (optItem.isPresent()) {
-			optItem.get().setDiscountedPrice(optItem.get().getPrice()*optItem.get().getDiscount()/100);
+			optItem.get().setDiscountedPrice(optItem.get().getPrice() * optItem.get().getDiscount() / 100);
 		}
 		return optItem;
 
@@ -61,11 +69,27 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public Page<Item> listByCategoryGroupByLanguage(String category, String language, Pageable pageable) {
-		Page<Item> items = itemRepository.findByCategoryAndLanguage(category, language, pageable);
-		
-		items.getContent().forEach(item->item.setDiscountedPrice(item.getPrice()*item.getDiscount()/100));
+		Page<Item> items = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
+
+		items.getContent().forEach(item -> item.setDiscountedPrice(item.getPrice() * item.getDiscount() / 100));
 		return items;
 	}
 
+	@Override
+	public Map<String, List<Item>> listByCategoryGroupByLanguage(String category, Pageable pageable) {
+		Map<String, List<Item>> itemsMap = new HashMap<String, List<Item>>();
+		List<String> languages = Arrays.asList("HINDI", "ENGLISH", "PUNJABI");
+
+		languages.forEach(language -> {
+			logger.info("FETCHING "+category+" FOR LANGUAGE : "+language);
+			Page<Item> languageItems = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
+			if (!languageItems.isEmpty()) {
+				logger.info("FETCHED  "+languageItems.getNumberOfElements()+" "+category+" FOR LANGUAGE : "+language);	
+//				itemsMap.putAll(languageItems.get().collect(Collectors.groupingBy(Item::getLanguage)));
+				languageItems.get().collect(Collectors.groupingBy(Item::getLanguage)).entrySet().forEach(entry->itemsMap.put(entry.getKey(), entry.getValue()));
+			}
+		});
+		return itemsMap;
+	}
 
 }

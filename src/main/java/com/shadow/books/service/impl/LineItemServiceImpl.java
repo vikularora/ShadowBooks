@@ -1,14 +1,14 @@
 package com.shadow.books.service.impl;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.shadow.books.domain.Item;
@@ -27,51 +27,50 @@ public class LineItemServiceImpl implements LineItemService {
 	@Autowired
 	ItemRepository itemRepository;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public ShoppingCart addLineItemToCart(ShoppingCart shoppingCart) {
+	public ShoppingCart addItemToCart(long userId, LineItem lineItem) {
 
-		shoppingCart.getLineItems().forEach(lineItem -> {
+		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
+		if (optItem.isPresent()) {
+			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
+
+			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+			lineItem.setAmount(lineItem.getUnitPrice() * lineItem.getQuantity());
+			lineItem.setStatus("ADDED");
+			lineItem.setUserId(userId);
+
+			lineItem.setDeleted(false);
+			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			lineItemRepository.save(lineItem);
+		}
+		return new ShoppingCart(userId, (Set<LineItem>) getShoppingCartByUserId(userId));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ShoppingCart updateCartItems(@Valid LineItem lineItem,  Long userId) {
+
 			Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
 			if (optItem.isPresent()) {
 				float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
 
-				lineItem.setPrice(optItem.get().getPrice() - discountPerItem);
-				lineItem.setAmount(lineItem.getPrice() * lineItem.getQuantity());
+				lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+				lineItem.setAmount(lineItem.getUnitPrice() * lineItem.getQuantity());
 				lineItem.setStatus("ADDED");
-				lineItem.setUserId(shoppingCart.getUserId());
-
+				lineItem.setUserId(lineItem.getUserId());
 				lineItem.setDeleted(false);
-				lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+				lineItem.setOrderId(null);
 				lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 				lineItemRepository.save(lineItem);
 			}
-		});
-		return shoppingCart;
+		return new ShoppingCart(userId, (Set<LineItem>) getShoppingCartByUserId(userId));
 	}
 
 	@Override
-	public ShoppingCart updateLineItemToCart(@Valid ShoppingCart shoppingCart) {
-
-		shoppingCart.getLineItems().forEach(lineItem -> {
-			Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
-			if (optItem.isPresent()) {
-				float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
-
-				lineItem.setPrice(optItem.get().getPrice() - discountPerItem);
-				lineItem.setAmount(lineItem.getPrice() * lineItem.getQuantity());
-				lineItem.setStatus("ADDED");
-				lineItem.setUserId(shoppingCart.getUserId());
-				lineItem.setDeleted(false);
-				lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-				lineItemRepository.save(lineItem);
-			}
-		});
-		return shoppingCart;
-	}
-
-	@Override
-	public Page<LineItem> listByUserId(Long userId, Pageable pageable) {
-		Page<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, "Added", pageable);
+	public List<LineItem> getShoppingCartByUserId(Long userId) {
+		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, "Added");
 		pageItems.forEach(item -> {
 			Optional<Item> optItem = itemRepository.findById(item.getProductId());
 			item.setName(optItem.get().getName());
@@ -81,6 +80,14 @@ public class LineItemServiceImpl implements LineItemService {
 
 		return pageItems;
 
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ShoppingCart deleteCartItemByUserId(long itemId,Long userId) {
+
+		itemRepository.deleteById(itemId);
+		return new ShoppingCart(userId, (Set<LineItem>) getShoppingCartByUserId(userId));
 	}
 
 }

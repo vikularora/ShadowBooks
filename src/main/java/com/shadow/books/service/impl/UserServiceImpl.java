@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,19 +21,20 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	UserRepository userRepository;
-
+	Logger logger = LogManager.getLogger(this.getClass());
 	@Override
 	public User add(User user) {
 
 		Optional<User> optUser = userRepository.findByContactNo(user.getContactNo());
 		if (optUser.isPresent()) {
+			logger.info("USER ALREADY EXISTS");
 			if(optUser.get().isDeleted()) {
 				optUser.get().setDeleted(false);
 				update(optUser.get());
 			}
 			return optUser.get();
 		}
-		
+		logger.info("HURREY!! NEW USER JOINED US");
 		user.setDeleted(false);
 		user.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		user.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());

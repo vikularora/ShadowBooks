@@ -1,15 +1,33 @@
 package com.shadow.books.service;
 
-import org.springframework.data.domain.Page;
+import java.util.List;
+import java.util.Optional;
 
-import com.shadow.books.domain.Orders;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.shadow.books.domain.Address;
+import com.shadow.books.domain.LineItem;
+import com.shadow.books.domain.Order;
 
 public interface OrderService {
 
-	Orders add(Orders order);
+	Order add(Order order);
 
-	Orders update(Orders order);
+//	Order update(Order order);
+//
+//	Page<Order> getOrderList(int page, int size);
 
-	Page<Orders> getOrderList(int page, int size);
+	Optional<Order> updateDelevieryAddressByOrderId(Long id, Address address);
+
+	Optional<Order> updateOrderStatus(Order order);
+
+	List<Order> findOrdersByUserId(long userId);
+	
+	List<LineItem> findOrderById(long orderId);
+
+	Page<Order> findAll(Pageable pageable);
+
 
 }
+

@@ -1,19 +1,22 @@
 package com.shadow.books.service;
 
-import javax.validation.Valid;
+import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import javax.validation.Valid;
 
 import com.shadow.books.domain.LineItem;
 import com.shadow.books.util.ShoppingCart;
 
 public interface LineItemService {
 
-	public ShoppingCart addLineItemToCart(ShoppingCart shoppingCart);
+//	public ShoppingCart addItemToCart(ShoppingCart shoppingCart);
 
-	public ShoppingCart updateLineItemToCart(@Valid ShoppingCart shoppingCart);
+	public ShoppingCart updateCartItems(@Valid LineItem lineItem,Long userId);
 
-	public Page<LineItem> listByUserId(Long userId, Pageable pageable);
+	public List<LineItem> getShoppingCartByUserId(Long userId);
+
+	ShoppingCart addItemToCart(long userId, LineItem lineItem);
+
+	ShoppingCart deleteCartItemByUserId(long itemId, Long userId);
 
 }
