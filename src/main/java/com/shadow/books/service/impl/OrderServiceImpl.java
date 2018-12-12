@@ -102,6 +102,7 @@ public class OrderServiceImpl implements OrderService {
 		List<LineItem> orderedItems = lineItemRepository.findByOrderId(orderId);
 		orderedItems.forEach(orderedItem -> {
 			Optional<Item> optItem = itemRepository.findById(orderedItem.getProductId());
+
 			orderedItem.setName(optItem.get().getName());
 			orderedItem.setLanguage(optItem.get().getLanguage());
 			orderedItem.setPicture(optItem.get().getPicture());
@@ -111,8 +112,11 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public Page<Order> findAll(Pageable pageable) {
-		return orderRepository.findAll(pageable);
+	public Page<Order> findAll(String status, Pageable pageable) {
+		if (status.isEmpty()) {
+			return orderRepository.findAll(pageable);
+		}
+		return orderRepository.findByStatus(status, pageable);
 	}
 
 }

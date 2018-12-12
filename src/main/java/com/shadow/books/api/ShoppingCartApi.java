@@ -58,9 +58,9 @@ public class ShoppingCartApi {
 
 
 	@GetMapping()
-	private ResponseEntity<List<LineItem>> list(@PathVariable(name = "userId", required = true) Long userId) {
+	private ResponseEntity<List<LineItem>> list(@PathVariable(name = "id", required = true) Long id) {
 
-		List<LineItem> cartItems = lineItemService.getShoppingCartByUserId(userId);
+		List<LineItem> cartItems = lineItemService.getShoppingCartByUserId(id);
 
 		if (cartItems.isEmpty()) {
 			return new ResponseEntity<List<LineItem>>(HttpStatus.NO_CONTENT);
@@ -71,7 +71,7 @@ public class ShoppingCartApi {
 
 	@DeleteMapping("{itemId}")
 	private ResponseEntity<ShoppingCart> deleteCartItemByUserId(@PathVariable("id") long userId,
-			@PathVariable("id") long itemId) {
+			@PathVariable("itemId") long itemId) {
 		logger.info("userid is :: " + userId);
 
 		ShoppingCart shoppingCart = lineItemService.deleteCartItemByUserId(itemId,userId);

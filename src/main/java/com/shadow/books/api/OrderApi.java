@@ -74,7 +74,7 @@ public class OrderApi {
 	public ResponseEntity<List<LineItem>> orderById(@PathVariable("id") long id) {
 
 		List<LineItem> orderedItems = orderService.findOrderById(id);
-		if (orderedItems.isEmpty()) {
+		if (!orderedItems.isEmpty()) {
 			return new ResponseEntity<List<LineItem>>(orderedItems, HttpStatus.OK);
 		}
 		return new ResponseEntity<List<LineItem>>(orderedItems, HttpStatus.NOT_MODIFIED);
@@ -84,12 +84,12 @@ public class OrderApi {
 	@GetMapping
 	public ResponseEntity<Page<Order>> allOrders(
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page,
-			@RequestParam(required = false, name = "size", defaultValue = "10") int size) {
+			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
+			@RequestParam(required = false, name = "status", defaultValue = "") String status) {
 
-		Pageable pageable = PageRequest.of(page, size);				
-		
-		Page<Order> orders = orderService.findAll(pageable);
-		if (orders.isEmpty()) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Order> orders = orderService.findAll(status, pageable);
+		if (!orders.isEmpty()) {
 			return new ResponseEntity<Page<Order>>(orders, HttpStatus.OK);
 		}
 		return new ResponseEntity<Page<Order>>(orders, HttpStatus.NOT_MODIFIED);
