@@ -92,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public List<Order> findOrdersByUserId(long userId) {
 
-		return orderRepository.findByUserIdStatusNotInIgnoreCase(userId, "CANCELLED");
+		return orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, "CANCELLED");
 
 	}
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -31,6 +32,7 @@ public class LineItemServiceImpl implements LineItemService {
 	@Override
 	public ShoppingCart addItemToCart(long userId, LineItem lineItem) {
 
+		System.out.println("------list--------"+lineItem);
 		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
 		if (optItem.isPresent()) {
 			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
@@ -43,9 +45,11 @@ public class LineItemServiceImpl implements LineItemService {
 			lineItem.setDeleted(false);
 			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			
+			System.out.println("-------before save----"+lineItem);
 			lineItemRepository.save(lineItem);
 		}
-		return new ShoppingCart(userId, (Set<LineItem>) getShoppingCartByUserId(userId));
+		return new ShoppingCart(userId, getShoppingCartByUserId(userId).stream().collect(Collectors.toSet()));
 	}
 
 	@SuppressWarnings("unchecked")

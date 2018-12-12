@@ -8,6 +8,6 @@ import com.shadow.books.domain.Order;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-	List<Order> findByUserIdStatusNotInIgnoreCase(long userId, String status);
+	List<Order> findByUserIdAndStatusNotInIgnoreCase(long userId, String status);
 
 }
