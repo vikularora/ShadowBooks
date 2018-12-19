@@ -30,7 +30,7 @@ public class Item implements Serializable {
 	private String category;
 	@Transient
 	private float discountedPrice;
-	private int discount;
+	private float discount;
 	private long quantity;
 	private boolean deleted;
 	@Column(updatable = false)
@@ -109,44 +109,44 @@ public class Item implements Serializable {
 		this.picture = picture;
 	}
 
-	public float getPrice() {
-		return price;
+	public Integer getPrice() {
+		return (int) price;
 	}
 
 	public void setPrice(float price) {
 		this.price = price;
 	}
 
-	public int getDiscount() {
+	public float getDiscount() {
 		return discount;
 	}
 
-	public void setDiscount(int discount) {
+	public void setDiscount(float discount) {
 		this.discount = discount;
 	}
 
-	public long getQuantity() {
-		return quantity;
+	public Integer getQuantity() {
+		return (int) quantity;
 	}
 
 	public void setQuantity(long quantity) {
 		this.quantity = quantity;
 	}
 
-	@Override
-	public String toString() {
-		return "Item [id=" + id + ", name=" + name + ", picture=" + Arrays.toString(picture) + ", description="
-				+ description + ", language=" + language + ", price=" + price + ", category=" + category + ", discount="
-				+ discount + ", quantity=" + quantity + ", deleted=" + deleted + ", createdOn=" + createdOn
-				+ ", modifiedOn=" + modifiedOn + "]";
-	}
-
-	public float getDiscountedPrice() {
-		return discountedPrice;
+	public Integer getDiscountedPrice() {
+		return (int) discountedPrice;
 	}
 
 	public void setDiscountedPrice(float discountedPrice) {
 		this.discountedPrice = discountedPrice;
+	}
+
+	@Override
+	public String toString() {
+		return "Item [id=" + id + ", name=" + name + ", picture=" + Arrays.toString(picture) + ", description="
+				+ description + ", language=" + language + ", price=" + price + ", category=" + category
+				+ ", discountedPrice=" + discountedPrice + ", discount=" + discount + ", quantity=" + quantity
+				+ ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

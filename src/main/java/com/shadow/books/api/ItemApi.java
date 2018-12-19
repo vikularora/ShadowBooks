@@ -61,7 +61,7 @@ public class ItemApi {
 	@GetMapping("category/{cat}")
 	private ResponseEntity<Map<String, List<Item>>> listByCategory(
 			@PathVariable(name = "cat", required = true) String cat,
-			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
+			@RequestParam(required = false, name = "size", defaultValue = "7") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
 
 		Pageable pageable = PageRequest.of(page, size);
@@ -105,5 +105,15 @@ public class ItemApi {
 	@DeleteMapping("delete/{id}")
 	public void delete(@PathVariable(name = "id", required = true) Long id) throws Exception {
 		itemService.delete(id);
+	}
+	
+	@GetMapping("search")
+	private ResponseEntity<Map<String, List<Item>>> search (@RequestParam("name") String name){
+		 Map<String, List<Item>> searchedItems = itemService.search(name);
+
+			if (searchedItems.isEmpty()) {
+				return new ResponseEntity<Map<String, List<Item>>>(HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<Map<String, List<Item>>>(searchedItems, HttpStatus.OK);
 	}
 }

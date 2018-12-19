@@ -69,9 +69,15 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public Page<Item> listByCategoryGroupByLanguage(String category, String language, Pageable pageable) {
-		Page<Item> items = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
+//		Page<Item> items = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
 
-		items.getContent().forEach(item -> item.setDiscountedPrice(item.getPrice() * item.getDiscount() / 100));
+		Page<Item> items = itemRepository.findByCategoryAndLanguageAllIgnoreCaseOrderByIdDesc(category, language,
+				pageable);
+
+		items.getContent().forEach(item -> {
+			float discount = item.getPrice() * item.getDiscount() / 100;
+			item.setDiscountedPrice(item.getPrice() - discount);
+		});
 		return items;
 	}
 
@@ -81,15 +87,53 @@ public class ItemServiceImpl implements ItemService {
 		List<String> languages = Arrays.asList("HINDI", "ENGLISH", "PUNJABI");
 
 		languages.forEach(language -> {
-			logger.info("FETCHING "+category+" FOR LANGUAGE : "+language);
-			Page<Item> languageItems = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
+			logger.info("FETCHING " + category + " FOR LANGUAGE : " + language);
+//			Page<Item> languageItems = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
+			Page<Item> languageItems = itemRepository.findByCategoryAndLanguageAllIgnoreCaseOrderByIdDesc(category,
+					language, pageable);
 			if (!languageItems.isEmpty()) {
-				logger.info("FETCHED  "+languageItems.getNumberOfElements()+" "+category+" FOR LANGUAGE : "+language);	
+				logger.info("FETCHED  " + languageItems.getNumberOfElements() + " " + category + " FOR LANGUAGE : "
+						+ language);
 //				itemsMap.putAll(languageItems.get().collect(Collectors.groupingBy(Item::getLanguage)));
-				languageItems.get().collect(Collectors.groupingBy(Item::getLanguage)).entrySet().forEach(entry->itemsMap.put(entry.getKey(), entry.getValue()));
+//				languageItems.get().collect(Collectors.groupingBy(Item::getLanguage)).entrySet().forEach(entry->itemsMap.put(entry.getKey(), entry.getValue()));
+
+				languageItems.get().collect(Collectors.groupingBy(Item::getLanguage)).entrySet().forEach(entry -> {
+
+					entry.getValue().forEach(item -> {
+						float discount = item.getPrice() * item.getDiscount() / 100;
+						item.setDiscountedPrice(item.getPrice() - discount);
+					});
+					itemsMap.put(entry.getKey(), entry.getValue());
+				});
+
 			}
 		});
 		return itemsMap;
+	}
+
+//	@Override
+//	public Map<String, List<Item>> search(String name) {
+//		
+//		List<Item> searchedItems = itemRepository.findByNameAndGroupByCategory(name);
+//		logger.info("searchedItems.size() is :: "+searchedItems.size());
+//		Map<String, List<Item>> itemsMap = new HashMap<>();
+//		
+//		searchedItems.stream().collect(Collectors.groupingBy(Item::getCategory)).entrySet().forEach(entry->itemsMap.put(entry.getKey(), entry.getValue()));
+//		return itemsMap;
+//		
+//	}
+	@Override
+	public Map<String, List<Item>> search(String name) {
+
+//		List<Item> searchedItems = itemRepository.findByName(name);
+		List<Item> searchedItems = itemRepository.findByNameOrderByIdAsc(name);
+		logger.info("searchedItems.size() is :: " + searchedItems.size());
+		Map<String, List<Item>> itemsMap = new HashMap<>();
+
+		searchedItems.stream().collect(Collectors.groupingBy(Item::getCategory)).entrySet()
+				.forEach(entry -> itemsMap.put(entry.getKey(), entry.getValue()));
+		return itemsMap;
+
 	}
 
 }

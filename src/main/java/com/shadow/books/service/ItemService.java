@@ -25,4 +25,8 @@ public interface ItemService {
 
 	Map<String, List<Item>> listByCategoryGroupByLanguage(String category, Pageable pageable);
 
+	Map<String, List<Item>> search(String name);
+
+//	Page<Item> listByCategoryGroupByLanguage(String category, String language, Pageable pageable);
+
 }
