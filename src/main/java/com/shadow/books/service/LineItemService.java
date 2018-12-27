@@ -15,7 +15,9 @@ public interface LineItemService {
 
 	public List<LineItem> getShoppingCartByUserId(Long userId);
 
-	ShoppingCart addItemToCart(long userId, LineItem lineItem);
+//	ShoppingCart addItemToCart(long userId, LineItem lineItem);
+	
+	LineItem addItemToCart(long userId, LineItem lineItem);
 
 	ShoppingCart deleteCartItemByUserId(long itemId, Long userId);
 

@@ -23,7 +23,7 @@ import com.shadow.books.service.LineItemService;
 import com.shadow.books.util.ShoppingCart;
 
 @RestController
-@RequestMapping("users/{id}/cart/")
+@RequestMapping("users/{id}/cart")
 public class ShoppingCartApi {
 
 	Logger logger = LogManager.getLogger(this.getClass());
@@ -31,17 +31,28 @@ public class ShoppingCartApi {
 	@Autowired
 	private LineItemService lineItemService;
 
+//	@PostMapping()
+//	private ResponseEntity<ShoppingCart> addToCart(@PathVariable("id") long userId,
+//			@Valid @RequestBody LineItem lineItem) {
+//		logger.info("userid is :: " + userId);
+//		ShoppingCart shoppingCart = lineItemService.addItemToCart(userId, lineItem);
+//
+//		if (shoppingCart != null && !shoppingCart.getLineItems().isEmpty()) {
+//			return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.CREATED);
+//		}
+//		return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.NO_CONTENT);
+//	}
 
+	
 	@PostMapping()
-	private ResponseEntity<ShoppingCart> addToCart(@PathVariable("id") long userId,
-			@Valid @RequestBody LineItem lineItem) {
+	private ResponseEntity<LineItem> addToCart(@PathVariable("id") long userId, @Valid @RequestBody LineItem lineItem) {
 		logger.info("userid is :: " + userId);
-		ShoppingCart shoppingCart = lineItemService.addItemToCart(userId, lineItem);
+		LineItem shoppingCart = lineItemService.addItemToCart(userId, lineItem);
 
-		if (shoppingCart != null && !shoppingCart.getLineItems().isEmpty()) {
-			return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.CREATED);
+		if (shoppingCart != null) {
+			return new ResponseEntity<LineItem>(HttpStatus.CREATED);
 		}
-		return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.NO_CONTENT);
+		return new ResponseEntity<LineItem>(HttpStatus.NO_CONTENT);
 	}
 
 	@PutMapping()
@@ -55,7 +66,6 @@ public class ShoppingCartApi {
 		}
 		return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.NO_CONTENT);
 	}
-
 
 	@GetMapping()
 	private ResponseEntity<List<LineItem>> list(@PathVariable(name = "id", required = true) Long id) {
@@ -74,7 +84,7 @@ public class ShoppingCartApi {
 			@PathVariable("itemId") long itemId) {
 		logger.info("userid is :: " + userId);
 
-		ShoppingCart shoppingCart = lineItemService.deleteCartItemByUserId(itemId,userId);
+		ShoppingCart shoppingCart = lineItemService.deleteCartItemByUserId(itemId, userId);
 		if (shoppingCart != null && !shoppingCart.getLineItems().isEmpty()) {
 			return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.CREATED);
 		}

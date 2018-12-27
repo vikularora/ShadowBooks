@@ -30,6 +30,8 @@ public class LineItemServiceImpl implements LineItemService {
 
 	@SuppressWarnings("unchecked")
 	@Override
+	
+	/*
 	public ShoppingCart addItemToCart(long userId, LineItem lineItem) {
 
 		System.out.println("------list--------"+lineItem);
@@ -50,6 +52,29 @@ public class LineItemServiceImpl implements LineItemService {
 			lineItemRepository.save(lineItem);
 		}
 		return new ShoppingCart(userId, getShoppingCartByUserId(userId).stream().collect(Collectors.toSet()));
+	}
+	 */
+	
+	public LineItem addItemToCart(long userId, LineItem lineItem) {
+
+		System.out.println("------list--------"+lineItem);
+		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
+		LineItem result = null;
+		if (optItem.isPresent()) {
+			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
+
+			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+			lineItem.setAmount(lineItem.getUnitPrice() * lineItem.getQuantity());
+			lineItem.setStatus("ADDED");
+			lineItem.setUserId(userId);
+
+			lineItem.setDeleted(false);
+			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			
+			result = lineItemRepository.save(lineItem);
+		}
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
