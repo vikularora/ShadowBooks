@@ -1,11 +1,14 @@
 package com.shadow.books.service.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +22,13 @@ import com.shadow.books.repository.ItemRepository;
 import com.shadow.books.repository.LineItemRepository;
 import com.shadow.books.repository.OrderRepository;
 import com.shadow.books.service.AddressService;
+import com.shadow.books.service.LineItemService;
 import com.shadow.books.service.OrderService;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Autowired
 	OrderRepository orderRepository;
@@ -32,26 +38,68 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	AddressService addressService;
+
 	@Autowired
 	ItemRepository itemRepository;
 
+	@Autowired
+	LineItemService lineItemService;
+
 	@Override
 	public Order add(Order order) {
-		Double totalAmount = 0.0d;
-		order.setDeleted(false);
-		order.setStatus("Placed");
-		order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-		order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		if (order.getItem() == null) {
+			Double totalAmount = 0.0d;
+			order.setDeleted(false);
+			order.setStatus("Placed");
+			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 
-		List<LineItem> listItem = lineItemRepository.findByUserIdAndStatus(order.getUserId(), "Added");
-		if (!listItem.isEmpty()) {
+			List<LineItem> listItem = lineItemRepository.findByUserIdAndStatus(order.getUserId(), "Added");
+			if (!listItem.isEmpty()) {
 
-			totalAmount = listItem.stream().collect(Collectors.summingDouble(LineItem::getAmount));
+				totalAmount = listItem.stream().collect(Collectors.summingDouble(LineItem::getAmount));
+			}
+
+			order.setTotalAmount(totalAmount);
+			order = orderRepository.save(order);
+			lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
+		} else {
+			order.setDeleted(false);
+			order.setStatus("Placed");
+			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+
+			Optional<Item> optItem = itemRepository.findById(order.getItem().getId());
+
+			if (optItem.isPresent()) {
+
+				Double discount = (double) (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
+				double unitAmount = optItem.get().getPrice() - discount;
+
+				order.setTotalAmount(unitAmount * order.getItem().getQuantity());
+				order = orderRepository.save(order);
+
+				LineItem lineItem = new LineItem();
+
+				float amount = (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
+				float unitPrice = optItem.get().getPrice() - amount;
+				lineItem.setUnitPrice(unitPrice);
+				lineItem.setOrderId(order.getId());
+				lineItem.setProductId(order.getItem().getId());
+				lineItem.setQuantity(order.getItem().getQuantity());
+				lineItem.setStatus("Ordered");
+				lineItem.setAmount(unitPrice * order.getItem().getQuantity());
+				lineItem.setUserId(order.getUserId());
+				lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+				lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+				lineItem.setDeleted(false);
+
+				logger.info("LINE ITEM :: " + lineItem);
+
+				lineItemRepository.save(lineItem);
+			}
+
 		}
-
-		order.setTotalAmount(totalAmount);
-		order = orderRepository.save(order);
-		lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
 		return order;
 	}
 
@@ -90,9 +138,45 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public List<Order> findOrdersByUserId(long userId) {
+	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
+//		Order orders = new Order();
+//		List<Order> send = new ArrayList<>();
+		List<String> itemList = new ArrayList<>();
 
-		return orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, "CANCELLED");
+		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, "CANCELLED", page);
+
+		if (!pageOrder.isEmpty()) {
+			pageOrder.forEach(order -> {
+
+//				orders.setOrders(findOrderById(orderId));
+//				orders.setAddress(order.getAddress());
+//				orders.setTotalAmount(order.getTotalAmount());
+//				orders.setStatus(order.getStatus());
+//				orders.setContactNo(order.getContactNo());
+//				send.add(orders);
+				List<LineItem> lineItems = lineItemRepository.findByOrderId(order.getId());
+				lineItems.forEach(lineItem -> {
+					Optional<Item> item = itemRepository.findById(lineItem.getProductId());
+//					orders.setName(item.get().getName());
+//					orders.setPicture(item.get().getPicture());
+//					orders.setAddress(order.getAddress());
+//					orders.setTotalAmount(order.getTotalAmount());
+//					orders.setStatus(order.getStatus());
+//					orders.setContactNo(order.getContactNo());
+//					send.add(orders);
+				
+					order.getName().add(item.get().getName());
+//					itemList.add(item.get().getName());
+					
+//					order.setName(item.get().getName());
+//					order.setPicture(item.get().getPicture());
+				});
+//				order.setName(itemList);
+
+			});
+		}
+
+		return pageOrder;
 
 	}
 
@@ -105,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
 
 			orderedItem.setName(optItem.get().getName());
 			orderedItem.setLanguage(optItem.get().getLanguage());
-			orderedItem.setPicture(optItem.get().getPicture());
+			orderedItem.setImageUrl(optItem.get().getImageUrl());
 		});
 		return orderedItems;
 

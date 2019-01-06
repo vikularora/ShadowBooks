@@ -13,7 +13,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 @Entity
-@SQLDelete(sql = "update LineItem set deleted = true where id=?")
+@SQLDelete(sql = "update line_item set deleted = true where id=?")
 @Where(clause = "deleted=false")
 public class LineItem {
 
@@ -22,8 +22,8 @@ public class LineItem {
 	private Long id;
 	private Long userId;
 	private Long productId;
-	private Long quantity;
-	private Float unitPrice;
+	private Integer quantity;
+	private float unitPrice;
 //	private Float discount;
 	private Float amount;
 	private String status;
@@ -34,7 +34,8 @@ public class LineItem {
 	@Transient
 	private String language;
 	@Transient
-	private Byte picture[];
+	private String imageUrl;
+//	private byte picture[];
 
 	private boolean deleted;
 	@Column(updatable = false)
@@ -51,10 +52,6 @@ public class LineItem {
 
 	public Long getProductId() {
 		return productId;
-	}
-
-	public Long getQuantity() {
-		return quantity;
 	}
 
 	public Float getAmount() {
@@ -89,8 +86,16 @@ public class LineItem {
 		this.productId = productId;
 	}
 
-	public void setQuantity(Long quantity) {
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
+	}
+
+	public void setUnitPrice(float unitPrice) {
+		this.unitPrice = unitPrice;
 	}
 
 	public void setAmount(Float amount) {
@@ -121,20 +126,12 @@ public class LineItem {
 		return language;
 	}
 
-	public Byte[] getPicture() {
-		return picture;
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	public void setLanguage(String language) {
 		this.language = language;
-	}
-
-	public void setPicture(Byte[] picture) {
-		this.picture = picture;
 	}
 
 	public Long getOrderId() {
@@ -145,20 +142,28 @@ public class LineItem {
 		this.orderId = orderId;
 	}
 
-	public Float getUnitPrice() {
-		return unitPrice;
+	public Integer getUnitPrice() {
+		return (int) unitPrice;
 	}
 
 	public void setUnitPrice(Float unitPrice) {
 		this.unitPrice = unitPrice;
 	}
 
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
 	@Override
 	public String toString() {
 		return "LineItem [id=" + id + ", userId=" + userId + ", productId=" + productId + ", quantity=" + quantity
 				+ ", unitPrice=" + unitPrice + ", amount=" + amount + ", status=" + status + ", orderId=" + orderId
-				+ ", name=" + name + ", language=" + language + ", picture=" + Arrays.toString(picture) + ", deleted="
-				+ deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+				+ ", name=" + name + ", language=" + language + ", imageUrl=" + imageUrl + ", deleted=" + deleted
+				+ ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

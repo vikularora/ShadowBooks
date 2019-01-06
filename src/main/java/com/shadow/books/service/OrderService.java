@@ -22,12 +22,11 @@ public interface OrderService {
 
 	Optional<Order> updateOrderStatus(Order order);
 
-	List<Order> findOrdersByUserId(long userId);
 
 	List<LineItem> findOrderById(long orderId);
 
-
 	Page<Order> findAll(String status, Pageable pageable);
 
+	Page<Order> findOrdersByUserId(long userId, Pageable pageable);
 
 }

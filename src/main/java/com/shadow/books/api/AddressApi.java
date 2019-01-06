@@ -46,6 +46,20 @@ public class AddressApi {
 	}
 
 	@CrossOrigin
+	@PutMapping("{userId}/address/update/status")
+	public ResponseEntity<Address> updateSelectedStatus(@PathVariable(name = "userId", required = true) Long userId,
+			@RequestBody Address address) throws Exception {
+
+		address.setUserId(userId);
+		Address result = addressService.updateSelectedStatus(address);
+
+		if (result != null) {
+			return new ResponseEntity<Address>(result, HttpStatus.OK);
+		}
+		return new ResponseEntity<Address>(result, HttpStatus.NOT_MODIFIED);
+	}
+
+	@CrossOrigin
 	@PutMapping("{userId}/address/update")
 	public ResponseEntity<Address> update(@PathVariable(name = "userId", required = true) Long userId,
 			@RequestBody Address address) throws Exception {

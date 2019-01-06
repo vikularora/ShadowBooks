@@ -35,9 +35,13 @@ public class OrderApi {
 	@Autowired
 	OrderService orderService;
 
+
+
 	@CrossOrigin
 	@PostMapping()
 	public ResponseEntity<Order> add(@RequestBody Order order) throws Exception {
+
+		logger.info("ORDER ADD BODY :: " + order);
 		Order result = orderService.add(order);
 
 		if (result != null) {

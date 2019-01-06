@@ -1,12 +1,13 @@
 package com.shadow.books.api;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,8 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shadow.books.domain.Order;
+import com.shadow.books.domain.OrderOnDemand;
+import com.shadow.books.domain.Suggestion;
 import com.shadow.books.domain.User;
+import com.shadow.books.service.OrderOnDemandService;
 import com.shadow.books.service.OrderService;
+import com.shadow.books.service.SuggestionService;
 import com.shadow.books.service.UserService;
 
 @RestController
@@ -33,6 +38,12 @@ public class UserApi {
 
 	@Autowired
 	OrderService orderService;
+
+	@Autowired
+	OrderOnDemandService orderOnDemandService;
+	
+	@Autowired
+	SuggestionService suggestionService;
 
 	@Autowired
 	private UserService userService;
@@ -96,14 +107,43 @@ public class UserApi {
 	}
 
 	@GetMapping("{userId}/orders")
-	public ResponseEntity<List<Order>> orderByUserId(@PathVariable("userId") long userId) {
+	public ResponseEntity<Page<Order>> orderByUserId(@PathVariable("userId") long userId,
+			@RequestParam(required = false, name = "page", defaultValue = "0") int page,
+			@RequestParam(required = false, name = "size", defaultValue = "10") int size) {
 
-		List<Order> orders = orderService.findOrdersByUserId(userId);
-		if (orders.isEmpty()) {
-			return new ResponseEntity<List<Order>>(orders, HttpStatus.OK);
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Order> orderList = orderService.findOrdersByUserId(userId, pageable);
+		if (orderList != null) {
+			return new ResponseEntity<Page<Order>>(orderList, HttpStatus.OK);
 		}
-		return new ResponseEntity<List<Order>>(orders, HttpStatus.NOT_MODIFIED);
+		return new ResponseEntity<Page<Order>>(orderList, HttpStatus.NO_CONTENT);
 
 	}
+
+	@PostMapping("on_demand/orders")
+	public ResponseEntity<OrderOnDemand> addOnDemandOrder(@RequestBody OrderOnDemand orderOnDemand) throws Exception {
+
+		logger.info("ORDER ON DEMAND ADD BODY :: " + orderOnDemand);
+		orderOnDemand = orderOnDemandService.addOnDemandOrder(orderOnDemand);
+
+		if (orderOnDemand != null) {
+			return new ResponseEntity<OrderOnDemand>(orderOnDemand, HttpStatus.CREATED);
+		}
+		return new ResponseEntity<OrderOnDemand>(orderOnDemand, HttpStatus.NO_CONTENT);
+	}
+	
+	@PostMapping("suggestions")
+	public ResponseEntity<Suggestion> addUserSuggestions(@RequestBody Suggestion suggestion) throws Exception {
+
+		logger.info("ORDER ON DEMAND ADD BODY :: " + suggestion);
+		suggestion = suggestionService.add(suggestion);
+
+		if (suggestion != null) {
+			return new ResponseEntity<Suggestion>(suggestion, HttpStatus.CREATED);
+		}
+		return new ResponseEntity<Suggestion>(suggestion, HttpStatus.NO_CONTENT);
+	}
+	
+	
 
 }

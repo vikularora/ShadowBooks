@@ -5,13 +5,13 @@ import java.util.List;
 import javax.validation.Valid;
 
 import com.shadow.books.domain.LineItem;
-import com.shadow.books.util.ShoppingCart;
+import com.shadow.books.dto.CartDto;
 
 public interface LineItemService {
 
 //	public ShoppingCart addItemToCart(ShoppingCart shoppingCart);
 
-	public ShoppingCart updateCartItems(@Valid LineItem lineItem,Long userId);
+	public LineItem updateCartItems(@Valid LineItem lineItem,Long userId);
 
 	public List<LineItem> getShoppingCartByUserId(Long userId);
 
@@ -19,6 +19,10 @@ public interface LineItemService {
 	
 	LineItem addItemToCart(long userId, LineItem lineItem);
 
-	ShoppingCart deleteCartItemByUserId(long itemId, Long userId);
+//	ShoppingCart deleteCartItemByUserId(long itemId, Long userId);
+	
+	void deleteCartItemByUserId(long itemId, Long userId);
+
+	public CartDto getCartFullDetails(CartDto cartDto);
 
 }

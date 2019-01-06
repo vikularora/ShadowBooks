@@ -1,5 +1,9 @@
 package com.shadow.books.api;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -7,14 +11,18 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.shadow.books.domain.Item;
 import com.shadow.books.service.ItemService;
@@ -35,18 +44,29 @@ public class ItemApi {
 	@Autowired
 	ItemService itemService;
 
-	@CrossOrigin
+	final private String UPLOAD_DIRECTORY = "/home/vikul/Desktop/shadow-images";
+
 	@PostMapping("add")
-	public ResponseEntity<Item> add(@RequestBody Item item) throws Exception {
+	public ResponseEntity<Item> add(@ModelAttribute Item item) throws Exception {
+
 		Item result = itemService.add(item);
 
 		if (result != null) {
+			result.setFile(null);
 			return new ResponseEntity<Item>(result, HttpStatus.CREATED);
 		}
 		return new ResponseEntity<Item>(result, HttpStatus.NO_CONTENT);
 	}
 
-	@CrossOrigin
+	@PostMapping("addImage")
+	public ResponseEntity<Item> addImage(@RequestParam("file") MultipartFile file) throws Exception {
+
+		logger.info("ADD IMAGE ::" + file.getBytes());
+
+		return new ResponseEntity<Item>(HttpStatus.NO_CONTENT);
+
+	}
+
 	@PutMapping("update")
 	public ResponseEntity<Item> update(@RequestBody Item item) throws Exception {
 
@@ -106,14 +126,41 @@ public class ItemApi {
 	public void delete(@PathVariable(name = "id", required = true) Long id) throws Exception {
 		itemService.delete(id);
 	}
-	
-	@GetMapping("search")
-	private ResponseEntity<Map<String, List<Item>>> search (@RequestParam("name") String name){
-		 Map<String, List<Item>> searchedItems = itemService.search(name);
 
-			if (searchedItems.isEmpty()) {
-				return new ResponseEntity<Map<String, List<Item>>>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<Map<String, List<Item>>>(searchedItems, HttpStatus.OK);
+//	@GetMapping("search")
+//	private ResponseEntity<Map<String, List<Item>>> search (@RequestParam("name") String name){
+//		 Map<String, List<Item>> searchedItems = itemService.search(name);
+//
+//			if (searchedItems.isEmpty()) {
+//				return new ResponseEntity<Map<String, List<Item>>>(HttpStatus.NO_CONTENT);
+//			}
+//			return new ResponseEntity<Map<String, List<Item>>>(searchedItems, HttpStatus.OK);
+//	}
+	@GetMapping("search")
+	private ResponseEntity<List<Item>> search(@RequestParam("name") String name) {
+		List<Item> searchedItems = itemService.search(name);
+
+		if (searchedItems.isEmpty()) {
+			return new ResponseEntity<List<Item>>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<Item>>(searchedItems, HttpStatus.OK);
 	}
+
+	@GetMapping("picture")
+	public ResponseEntity<ByteArrayResource> downloadFile(@RequestParam("imgPath") String imgPath) {
+
+		String rpath = UPLOAD_DIRECTORY;
+		rpath = rpath + "/" + imgPath; // whatever path you used for storing the file
+		Path path = Paths.get(rpath);
+		byte[] data = null;
+		try {
+			data = Files.readAllBytes(path);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imgPath + "\"")
+				.body(new ByteArrayResource(data));
+	}
+
 }

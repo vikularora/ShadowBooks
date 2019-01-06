@@ -17,12 +17,15 @@ public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private String name;
 	private String houseNumber;
 	private String street;
 	private String area;
 	private String landmark;
-	private Long contactNo;
+	private String contactNo;
 	private Long userId;
+
+	private boolean isSelected;
 	private boolean deleted;
 	@Column(updatable = false)
 	private long createdOn;
@@ -44,10 +47,6 @@ public class Address {
 		return landmark;
 	}
 
-	public Long getContactNo() {
-		return contactNo;
-	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -62,10 +61,6 @@ public class Address {
 
 	public void setLandmark(String landmark) {
 		this.landmark = landmark;
-	}
-
-	public void setContactNo(Long contactNo) {
-		this.contactNo = contactNo;
 	}
 
 	public String getStreet() {
@@ -108,11 +103,36 @@ public class Address {
 		this.userId = userId;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public boolean isSelected() {
+		return isSelected;
+	}
+
+	public void setSelected(boolean isSelected) {
+		this.isSelected = isSelected;
+	}
+
+	public String getContactNo() {
+		return contactNo;
+	}
+
+	public void setContactNo(String contactNo) {
+		this.contactNo = contactNo;
+	}
+
 	@Override
 	public String toString() {
-		return "Address [id=" + id + ", houseNumber=" + houseNumber + ", street=" + street + ", area=" + area
-				+ ", landmark=" + landmark + ", contactNo=" + contactNo + ", userId=" + userId + ", deleted=" + deleted
-				+ ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+		return "Address [id=" + id + ", name=" + name + ", houseNumber=" + houseNumber + ", street=" + street
+				+ ", area=" + area + ", landmark=" + landmark + ", contactNo=" + contactNo + ", userId=" + userId
+				+ ", isSelected=" + isSelected + ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn="
+				+ modifiedOn + "]";
 	}
 
 }

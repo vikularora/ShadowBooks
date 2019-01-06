@@ -12,10 +12,14 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @SQLDelete(sql = "update item set deleted = true where id=?")
 @Where(clause = "deleted=false")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Item implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -23,13 +27,16 @@ public class Item implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String name;
-	private Byte picture[];
+//	private byte picture[];
+	private String imageUrl;
 	private String description;
 	private String language;
 	private float price;
 	private String category;
 	@Transient
 	private float discountedPrice;
+	@Transient
+	private MultipartFile file;
 	private float discount;
 	private long quantity;
 	private boolean deleted;
@@ -101,14 +108,6 @@ public class Item implements Serializable {
 		this.modifiedOn = modifiedOn;
 	}
 
-	public Byte[] getPicture() {
-		return picture;
-	}
-
-	public void setPicture(Byte[] picture) {
-		this.picture = picture;
-	}
-
 	public Integer getPrice() {
 		return (int) price;
 	}
@@ -125,7 +124,7 @@ public class Item implements Serializable {
 		this.discount = discount;
 	}
 
-	public Integer getQuantity() {
+	public int getQuantity() {
 		return (int) quantity;
 	}
 
@@ -141,11 +140,27 @@ public class Item implements Serializable {
 		this.discountedPrice = discountedPrice;
 	}
 
+	public MultipartFile getFile() {
+		return file;
+	}
+
+	public void setFile(MultipartFile file) {
+		this.file = file;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
 	@Override
 	public String toString() {
-		return "Item [id=" + id + ", name=" + name + ", picture=" + Arrays.toString(picture) + ", description="
-				+ description + ", language=" + language + ", price=" + price + ", category=" + category
-				+ ", discountedPrice=" + discountedPrice + ", discount=" + discount + ", quantity=" + quantity
+		return "Item [id=" + id + ", name=" + name + ", imageUrl=" + imageUrl + ", description=" + description
+				+ ", language=" + language + ", price=" + price + ", category=" + category + ", discountedPrice="
+				+ discountedPrice + ", file=" + file + ", discount=" + discount + ", quantity=" + quantity
 				+ ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 

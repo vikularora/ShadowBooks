@@ -8,6 +8,8 @@ public interface AddressService {
 
 
 	Address add(Address address);
+	
+	Address updateSelectedStatus(Address address);
 
 	Address update(Address address);
 

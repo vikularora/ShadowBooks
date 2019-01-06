@@ -1,5 +1,9 @@
 package com.shadow.books.service.impl;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -16,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.shadow.books.domain.Item;
 import com.shadow.books.repository.ItemRepository;
@@ -24,17 +29,47 @@ import com.shadow.books.service.ItemService;
 @Service
 public class ItemServiceImpl implements ItemService {
 
+	final private String UPLOAD_DIRECTORY = "/home/vikul/Desktop/shadow-images";
+
 	@Autowired
 	ItemRepository itemRepository;
 	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Override
-	public Item add(Item inventory) {
+	public Item add(Item inventory) throws IOException {
 
+		String imageUrl = saveImage(inventory);
+
+		inventory.setImageUrl("/items/picture?imgPath=" + (imageUrl));
 		inventory.setDeleted(false);
 		inventory.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		inventory.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		return itemRepository.save(inventory);
+
+	}
+
+	private String saveImage(Item inventory) throws IOException {
+
+		MultipartFile file = inventory.getFile();
+		if (!file.isEmpty()) {
+			byte[] bytes = file.getBytes();
+			File dir = new File(UPLOAD_DIRECTORY);
+			if (!dir.exists())
+				dir.mkdirs();
+			String imageName = inventory.getCategory() + "-" + inventory.getLanguage() + "-" + inventory.getName()
+					+ Calendar.getInstance().getTimeInMillis();
+			File serverFile = new File(dir.getAbsolutePath() + File.separator + imageName);
+			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+			stream.write(bytes);
+			stream.close();
+
+			logger.info("Server File Location=" + serverFile.getAbsolutePath());
+			logger.info("You successfully uploaded file=" + imageName);
+			return imageName;
+		} else {
+			logger.info("Failed to upload image  because the file was empty.");
+			return null;
+		}
 
 	}
 
@@ -113,26 +148,22 @@ public class ItemServiceImpl implements ItemService {
 
 //	@Override
 //	public Map<String, List<Item>> search(String name) {
-//		
-//		List<Item> searchedItems = itemRepository.findByNameAndGroupByCategory(name);
-//		logger.info("searchedItems.size() is :: "+searchedItems.size());
+//
+////		List<Item> searchedItems = itemRepository.findByName(name);
+//		List<Item> searchedItems = itemRepository.findByNameOrderByIdAsc(name);
+//		logger.info("searchedItems.size() is :: " + searchedItems.size());
 //		Map<String, List<Item>> itemsMap = new HashMap<>();
-//		
-//		searchedItems.stream().collect(Collectors.groupingBy(Item::getCategory)).entrySet().forEach(entry->itemsMap.put(entry.getKey(), entry.getValue()));
+//
+//		searchedItems.stream().collect(Collectors.groupingBy(Item::getCategory)).entrySet()
+//				.forEach(entry -> itemsMap.put(entry.getKey(), entry.getValue()));
 //		return itemsMap;
-//		
+//
 //	}
+
 	@Override
-	public Map<String, List<Item>> search(String name) {
+	public List<Item> search(String name) {
 
-//		List<Item> searchedItems = itemRepository.findByName(name);
-		List<Item> searchedItems = itemRepository.findByNameOrderByIdAsc(name);
-		logger.info("searchedItems.size() is :: " + searchedItems.size());
-		Map<String, List<Item>> itemsMap = new HashMap<>();
-
-		searchedItems.stream().collect(Collectors.groupingBy(Item::getCategory)).entrySet()
-				.forEach(entry -> itemsMap.put(entry.getKey(), entry.getValue()));
-		return itemsMap;
+		return itemRepository.findByNameOrderByIdDesc(name);
 
 	}
 
