@@ -24,8 +24,8 @@ public class Address {
 	private String landmark;
 	private String contactNo;
 	private Long userId;
-
 	private boolean isSelected;
+
 	private boolean deleted;
 	@Column(updatable = false)
 	private long createdOn;

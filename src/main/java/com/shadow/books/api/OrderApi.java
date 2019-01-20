@@ -35,8 +35,6 @@ public class OrderApi {
 	@Autowired
 	OrderService orderService;
 
-
-
 	@CrossOrigin
 	@PostMapping()
 	public ResponseEntity<Order> add(@RequestBody Order order) throws Exception {

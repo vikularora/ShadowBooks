@@ -15,14 +15,21 @@ import com.shadow.books.domain.LineItem;
 public interface LineItemRepository extends JpaRepository<LineItem, Long> {
 
 	List<LineItem> findByUserIdAndStatusAndOrderIdIsNull(Long userId, String string);
-	
+
 	List<LineItem> findByOrderId(Long orderId);
-	
+
 	List<LineItem> findByUserIdAndStatus(Long userId, String status);
+
+//	void setDeleted(boolean bool);
 
 	@Transactional
 	@Modifying
 	@Query("update LineItem li set li.status= 'ordered', li.orderId=:orderId where li.status='added' and li.userId = :userId")
 	void setOrderIdAndStatus(@Param("orderId") Long orderId, @Param("userId") Long userId);
+
+	@Transactional
+	@Modifying
+	@Query("update LineItem li set li.deleted= 1 where li.productId = :productId")
+	void setDeleted(@Param("productId") Long productId);
 
 }

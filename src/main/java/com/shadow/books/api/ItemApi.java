@@ -81,7 +81,7 @@ public class ItemApi {
 	@GetMapping("category/{cat}")
 	private ResponseEntity<Map<String, List<Item>>> listByCategory(
 			@PathVariable(name = "cat", required = true) String cat,
-			@RequestParam(required = false, name = "size", defaultValue = "7") int size,
+			@RequestParam(required = false, name = "size", defaultValue = "15") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
 
 		Pageable pageable = PageRequest.of(page, size);

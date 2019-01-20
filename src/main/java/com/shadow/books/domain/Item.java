@@ -1,7 +1,6 @@
 package com.shadow.books.domain;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -116,8 +115,8 @@ public class Item implements Serializable {
 		this.price = price;
 	}
 
-	public float getDiscount() {
-		return discount;
+	public Integer getDiscount() {
+		return (int) discount;
 	}
 
 	public void setDiscount(float discount) {

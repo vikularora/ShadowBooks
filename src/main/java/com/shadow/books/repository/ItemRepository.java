@@ -19,4 +19,9 @@ public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
 	List<Item> findByName(String name);
 
 	List<Item> findByNameOrderByIdDesc(String name);
+
+	
+	
+//		Page<Item> findByCategoryAndLanguageAllIgnoreCase(String category, String language, Pageable pageable);
+
 }

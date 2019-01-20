@@ -1,6 +1,5 @@
 package com.shadow.books.service.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -139,9 +138,6 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
-//		Order orders = new Order();
-//		List<Order> send = new ArrayList<>();
-		List<String> itemList = new ArrayList<>();
 
 		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, "CANCELLED", page);
 
@@ -156,7 +152,14 @@ public class OrderServiceImpl implements OrderService {
 //				send.add(orders);
 				List<LineItem> lineItems = lineItemRepository.findByOrderId(order.getId());
 				lineItems.forEach(lineItem -> {
-					Optional<Item> item = itemRepository.findById(lineItem.getProductId());
+//					Optional<Item> item = itemRepository.findById(lineItem.getProductId());
+
+//					if (item.isPresent()) {
+//						order.getName().add(item.get().getName());
+////					itemList.add(item.get().getName());
+//					}
+					order.getName().add(lineItem.getName());
+
 //					orders.setName(item.get().getName());
 //					orders.setPicture(item.get().getPicture());
 //					orders.setAddress(order.getAddress());
@@ -164,10 +167,10 @@ public class OrderServiceImpl implements OrderService {
 //					orders.setStatus(order.getStatus());
 //					orders.setContactNo(order.getContactNo());
 //					send.add(orders);
-				
-					order.getName().add(item.get().getName());
-//					itemList.add(item.get().getName());
-					
+//					if (item.isPresent()) {
+//						order.getName().add(item.get().getName());
+////					itemList.add(item.get().getName());
+//					}
 //					order.setName(item.get().getName());
 //					order.setPicture(item.get().getPicture());
 				});

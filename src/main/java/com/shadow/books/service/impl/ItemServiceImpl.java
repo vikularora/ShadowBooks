@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.shadow.books.domain.Item;
 import com.shadow.books.repository.ItemRepository;
+import com.shadow.books.repository.LineItemRepository;
 import com.shadow.books.service.ItemService;
 
 @Service
@@ -33,6 +34,10 @@ public class ItemServiceImpl implements ItemService {
 
 	@Autowired
 	ItemRepository itemRepository;
+
+	@Autowired
+	LineItemRepository lineItemRepository;
+
 	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Override
@@ -41,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
 		String imageUrl = saveImage(inventory);
 
 		inventory.setImageUrl("/items/picture?imgPath=" + (imageUrl));
+//		inventory.setImageUrl(imageUrl);
 		inventory.setDeleted(false);
 		inventory.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		inventory.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
@@ -99,7 +105,9 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public void delete(Long id) {
+		lineItemRepository.setDeleted(id);
 		itemRepository.deleteById(id);
+
 	}
 
 	@Override

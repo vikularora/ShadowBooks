@@ -63,6 +63,7 @@ public class LineItemServiceImpl implements LineItemService {
 
 			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
+			lineItem.setName(optItem.get().getName());
 			lineItem.setStatus("ADDED");
 			lineItem.setUserId(userId);
 
@@ -86,6 +87,7 @@ public class LineItemServiceImpl implements LineItemService {
 			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
 			lineItem.setStatus("ADDED");
 			lineItem.setUserId(userId);
+			lineItem.setName(optItem.get().getName());
 			lineItem.setDeleted(false);
 			lineItem.setOrderId(null);
 			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
@@ -100,9 +102,12 @@ public class LineItemServiceImpl implements LineItemService {
 		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, "Added");
 		pageItems.forEach(item -> {
 			Optional<Item> optItem = itemRepository.findById(item.getProductId());
-			item.setName(optItem.get().getName());
-			item.setLanguage(optItem.get().getLanguage());
-			item.setImageUrl(optItem.get().getImageUrl());
+			if (optItem.isPresent()) {
+				item.setName(optItem.get().getName());
+				item.setLanguage(optItem.get().getLanguage());
+				item.setImageUrl(optItem.get().getImageUrl());
+			}
+
 		});
 
 		return pageItems;
@@ -119,8 +124,6 @@ public class LineItemServiceImpl implements LineItemService {
 				return null;
 			}
 			List<Address> address = addressRepository.findByIsSelectedAndUserId(true, cartDto.getUserId());
-
-			System.out.println(address + " ::  Address ,, Cart details ::" + pageItems);
 
 			cartDto.setAddress(address);
 			cartDto.setCartDetails(pageItems);
@@ -142,17 +145,6 @@ public class LineItemServiceImpl implements LineItemService {
 				lineItem.setLanguage(optItem.get().getLanguage());
 				lineItem.setImageUrl(optItem.get().getImageUrl());
 				cartDto.getCartDetails().add(lineItem);
-//				cartDto.getCartDetails().forEach(cart->{
-//					float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
-//					cart.setUnitPrice(optItem.get().getPrice() - discountPerItem);
-//					cart.setAmount((float) (cart.getUnitPrice() * cartDto.getQuantity()));
-//					cart.setName(optItem.get().getName());
-//					cart.setQuantity(cartDto.getQuantity());
-//					cart.setProductId(cartDto.getProductId());
-//					cart.setLanguage(optItem.get().getLanguage());
-//					cart.setPicture(optItem.get().getPicture());
-//									
-//				});
 			}
 
 			System.out.println(cartDto + "  :: ");

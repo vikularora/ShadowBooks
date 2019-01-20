@@ -1,7 +1,5 @@
 package com.shadow.books.domain;
 
-import java.util.Arrays;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,18 +22,15 @@ public class LineItem {
 	private Long productId;
 	private Integer quantity;
 	private float unitPrice;
-//	private Float discount;
 	private Float amount;
 	private String status;
 	private Long orderId;
-
-	@Transient
 	private String name;
+
 	@Transient
 	private String language;
 	@Transient
 	private String imageUrl;
-//	private byte picture[];
 
 	private boolean deleted;
 	@Column(updatable = false)
