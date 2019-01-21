@@ -37,7 +37,7 @@ public class ShoppingCart {
 	}
 
 	public ShoppingCart(@NotNull(message = "identify Yourself") Long userId,
-			@NotNull @Size(min = 1, message = "hey! Let we go") Set<LineItem> lineItems) {
+			@NotNull @Size(min = 1, message = "hey! Let us go") Set<LineItem> lineItems) {
 		super();
 		this.userId = userId;
 		this.lineItems = lineItems;

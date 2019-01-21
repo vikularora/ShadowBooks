@@ -17,7 +17,7 @@ public interface LineItemService {
 
 //	ShoppingCart addItemToCart(long userId, LineItem lineItem);
 	
-	LineItem addItemToCart(long userId, LineItem lineItem);
+	LineItem addItemToCart(LineItem lineItem);
 
 //	ShoppingCart deleteCartItemByUserId(long itemId, Long userId);
 	

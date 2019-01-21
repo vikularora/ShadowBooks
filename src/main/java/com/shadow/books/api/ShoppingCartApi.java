@@ -46,7 +46,8 @@ public class ShoppingCartApi {
 	@PostMapping()
 	private ResponseEntity<LineItem> addToCart(@PathVariable("id") long userId, @Valid @RequestBody LineItem lineItem) {
 		logger.info("userid is :: " + userId);
-		LineItem shoppingCart = lineItemService.addItemToCart(userId, lineItem);
+		lineItem.setUserId(userId);
+		LineItem shoppingCart = lineItemService.addItemToCart(lineItem);
 
 		if (shoppingCart != null) {
 			return new ResponseEntity<LineItem>(shoppingCart, HttpStatus.CREATED);

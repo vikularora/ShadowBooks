@@ -31,41 +31,69 @@ public class LineItemServiceImpl implements LineItemService {
 	@Autowired
 	AddressRepository addressRepository;
 
-	/*
-	 * public ShoppingCart addItemToCart(long userId, LineItem lineItem) {
-	 * 
-	 * System.out.println("------list--------"+lineItem); Optional<Item> optItem =
-	 * itemRepository.findById(lineItem.getProductId()); if (optItem.isPresent()) {
-	 * float discountPerItem = (optItem.get().getPrice() *
-	 * optItem.get().getDiscount()) / 100;
-	 * 
-	 * lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
-	 * lineItem.setAmount(lineItem.getUnitPrice() * lineItem.getQuantity());
-	 * lineItem.setStatus("ADDED"); lineItem.setUserId(userId);
-	 * 
-	 * lineItem.setDeleted(false);
-	 * lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).
-	 * getTimeInMillis());
-	 * lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).
-	 * getTimeInMillis());
-	 * 
-	 * System.out.println("-------before save----"+lineItem);
-	 * lineItemRepository.save(lineItem); } return new ShoppingCart(userId,
-	 * getShoppingCartByUserId(userId).stream().collect(Collectors.toSet())); }
-	 */
+	
+//	 public ShoppingCart addItemToCart(long userId, LineItem lineItem) {
+//	 
+//	 System.out.println("------list--------"+lineItem); Optional<Item> optItem =
+//	 itemRepository.findById(lineItem.getProductId()); if (optItem.isPresent()) {
+//	 float discountPerItem = (optItem.get().getPrice() *
+//	 optItem.get().getDiscount()) / 100;
+//	 
+//	 lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+//	 lineItem.setAmount(lineItem.getUnitPrice() * lineItem.getQuantity());
+//	 lineItem.setStatus("ADDED"); lineItem.setUserId(userId);
+//	 
+//	 lineItem.setDeleted(false);
+//	 lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).
+//	 getTimeInMillis());
+//	 lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).
+//	 getTimeInMillis());
+//	 
+//	 System.out.println("-------before save----"+lineItem);
+//	lineItemRepository.save(lineItem); } return new ShoppingCart(userId,
+//	 getShoppingCartByUserId(userId).stream().collect(Collectors.toSet())); }
+	
+//	@Override
+//	public LineItem addItemToCart(long userId, LineItem lineItem) {
+//
+//		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
+//		LineItem result = null;
+//		if (optItem.isPresent()) {
+//			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
+//
+//			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+//			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
+//			lineItem.setName(optItem.get().getName());
+//			lineItem.setStatus("ADDED");
+//			lineItem.setUserId(userId);
+//
+//			lineItem.setDeleted(false);
+//			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//
+//			result = lineItemRepository.save(lineItem);
+//		}
+//		return result;
+//	}
 	@Override
-	public LineItem addItemToCart(long userId, LineItem lineItem) {
+	public LineItem addItemToCart(LineItem lineItem) {
 
 		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
 		LineItem result = null;
 		if (optItem.isPresent()) {
+
 			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
+
+			LineItem isPresent = checkIfProductAlreadyExistInCart(lineItem, discountPerItem, optItem);
+			if (isPresent != null) {
+				return isPresent;
+			}
 
 			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
 			lineItem.setName(optItem.get().getName());
 			lineItem.setStatus("ADDED");
-			lineItem.setUserId(userId);
+			lineItem.setUserId(lineItem.getUserId());
 
 			lineItem.setDeleted(false);
 			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
@@ -74,6 +102,21 @@ public class LineItemServiceImpl implements LineItemService {
 			result = lineItemRepository.save(lineItem);
 		}
 		return result;
+	}
+
+	private LineItem checkIfProductAlreadyExistInCart(LineItem lineItem, float discountPerItem,
+			Optional<Item> optItem) {
+
+		LineItem lineItemDetails = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
+				lineItem.getUserId(), "Added", lineItem.getProductId());
+		
+		if (lineItemDetails != null) {
+			lineItemDetails.setQuantity(lineItemDetails.getQuantity() + lineItem.getQuantity());
+			lineItemDetails.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+			lineItemDetails.setAmount((float) (lineItemDetails.getUnitPrice() * lineItemDetails.getQuantity()));
+			return lineItemRepository.save(lineItemDetails);
+		}
+		return null;
 	}
 
 	@Override

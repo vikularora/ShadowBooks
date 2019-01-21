@@ -32,4 +32,6 @@ public interface LineItemRepository extends JpaRepository<LineItem, Long> {
 	@Query("update LineItem li set li.deleted= 1 where li.productId = :productId")
 	void setDeleted(@Param("productId") Long productId);
 
+	LineItem findByUserIdAndStatusAndProductIdAndOrderIdIsNull(long userId, String string, Long productId);
+
 }
