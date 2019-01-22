@@ -22,22 +22,28 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	UserRepository userRepository;
 	Logger logger = LogManager.getLogger(this.getClass());
+
 	@Override
 	public User add(User user) {
+		long time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
 
 		Optional<User> optUser = userRepository.findByContactNo(user.getContactNo());
+
 		if (optUser.isPresent()) {
 			logger.info("USER ALREADY EXISTS");
-			if(optUser.get().isDeleted()) {
-				optUser.get().setDeleted(false);
+			if (optUser.get().isDeleted()) {
+//				optUser.get().setDeleted(false);
 				update(optUser.get());
 			}
-			return optUser.get();
+//			optUser.get().setDeleted(false);
+//			optUser.get().setModifiedOn(time);
+			optUser.get().setName(user.getName());
+			return update(optUser.get());
 		}
 		logger.info("HURREY!! NEW USER JOINED US");
 		user.setDeleted(false);
-		user.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-		user.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		user.setCreatedOn(time);
+		user.setModifiedOn(time);
 		return userRepository.save(user);
 	}
 

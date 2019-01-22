@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import com.shadow.books.domain.LineItem;
 import com.shadow.books.dto.CartDto;
+import com.shadow.books.dto.SizeDto;
 
 public interface LineItemService {
 
@@ -24,5 +25,7 @@ public interface LineItemService {
 	void deleteCartItemByUserId(long itemId, Long userId);
 
 	public CartDto getCartFullDetails(CartDto cartDto);
+
+	public SizeDto checkCartSize(long userId);
 
 }

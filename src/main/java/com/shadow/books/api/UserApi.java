@@ -41,7 +41,7 @@ public class UserApi {
 
 	@Autowired
 	OrderOnDemandService orderOnDemandService;
-	
+
 	@Autowired
 	SuggestionService suggestionService;
 
@@ -131,7 +131,7 @@ public class UserApi {
 		}
 		return new ResponseEntity<OrderOnDemand>(orderOnDemand, HttpStatus.NO_CONTENT);
 	}
-	
+
 	@PostMapping("suggestions")
 	public ResponseEntity<Suggestion> addUserSuggestions(@RequestBody Suggestion suggestion) throws Exception {
 
@@ -143,7 +143,5 @@ public class UserApi {
 		}
 		return new ResponseEntity<Suggestion>(suggestion, HttpStatus.NO_CONTENT);
 	}
-	
-	
 
 }

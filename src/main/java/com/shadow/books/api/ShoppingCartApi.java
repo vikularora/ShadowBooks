@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shadow.books.domain.LineItem;
 import com.shadow.books.dto.CartDto;
+import com.shadow.books.dto.SizeDto;
 import com.shadow.books.service.LineItemService;
 
 @RestController
@@ -44,15 +45,18 @@ public class ShoppingCartApi {
 //	}
 
 	@PostMapping()
-	private ResponseEntity<LineItem> addToCart(@PathVariable("id") long userId, @Valid @RequestBody LineItem lineItem) {
+	private ResponseEntity<SizeDto> addToCart(@PathVariable("id") long userId, @Valid @RequestBody LineItem lineItem) {
 		logger.info("userid is :: " + userId);
 		lineItem.setUserId(userId);
 		LineItem shoppingCart = lineItemService.addItemToCart(lineItem);
 
 		if (shoppingCart != null) {
-			return new ResponseEntity<LineItem>(shoppingCart, HttpStatus.CREATED);
+			SizeDto size = lineItemService.checkCartSize(userId);
+			return new ResponseEntity<SizeDto>(size, HttpStatus.CREATED);
+
 		}
-		return new ResponseEntity<LineItem>(shoppingCart, HttpStatus.NO_CONTENT);
+
+		return new ResponseEntity<SizeDto>(HttpStatus.NO_CONTENT);
 	}
 
 	@PutMapping()

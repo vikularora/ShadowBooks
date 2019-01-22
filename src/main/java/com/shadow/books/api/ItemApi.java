@@ -10,6 +10,9 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -79,18 +82,31 @@ public class ItemApi {
 	}
 
 	@GetMapping("category/{cat}")
-	private ResponseEntity<Map<String, List<Item>>> listByCategory(
+	private ResponseEntity<JSONArray> listByCategory(
 			@PathVariable(name = "cat", required = true) String cat,
 			@RequestParam(required = false, name = "size", defaultValue = "15") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
+		JSONArray jsonArray = new JSONArray();
 
 		Pageable pageable = PageRequest.of(page, size);
 		Map<String, List<Item>> itemsMap = itemService.listByCategoryGroupByLanguage(cat, pageable);
 
 		if (itemsMap.isEmpty()) {
-			return new ResponseEntity<Map<String, List<Item>>>(HttpStatus.NO_CONTENT);
+		
+			return new ResponseEntity<JSONArray>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<Map<String, List<Item>>>(itemsMap, HttpStatus.OK);
+		itemsMap.entrySet().forEach(entry -> {
+			JSONObject jsonObject = new JSONObject();
+			try {
+				jsonObject.put("language", entry.getKey());
+				jsonObject.put("list", entry.getValue());
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			jsonArray.put(jsonObject);
+		});
+		return new ResponseEntity<JSONArray>(jsonArray, HttpStatus.OK);
 	}
 
 	@GetMapping("list")

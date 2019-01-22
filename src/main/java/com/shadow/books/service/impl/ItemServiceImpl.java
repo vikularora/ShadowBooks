@@ -171,8 +171,13 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public List<Item> search(String name) {
 
-		return itemRepository.findByNameOrderByIdDesc(name);
+//		return itemRepository.findByNameOrderByIdDesc(name);
+		List<Item> items = itemRepository.findByNameOrderByIdDesc(name);
+		items.forEach(item -> {
+			float discount = item.getPrice() * item.getDiscount() / 100;
+			item.setDiscountedPrice(item.getPrice() - discount);
+		});
 
+		return items;
 	}
-
 }

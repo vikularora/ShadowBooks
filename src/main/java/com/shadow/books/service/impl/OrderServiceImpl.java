@@ -46,12 +46,19 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public Order add(Order order) {
+
+		order.setDeleted(false);
+		order.setStatus("Placed");
+		order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+
 		if (order.getItem() == null) {
+
 			Double totalAmount = 0.0d;
-			order.setDeleted(false);
-			order.setStatus("Placed");
-			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//			order.setDeleted(false);
+//			order.setStatus("Placed");
+//			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 
 			List<LineItem> listItem = lineItemRepository.findByUserIdAndStatus(order.getUserId(), "Added");
 			if (!listItem.isEmpty()) {
@@ -63,10 +70,10 @@ public class OrderServiceImpl implements OrderService {
 			order = orderRepository.save(order);
 			lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
 		} else {
-			order.setDeleted(false);
-			order.setStatus("Placed");
-			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//			order.setDeleted(false);
+//			order.setStatus("Placed");
+//			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 
 			Optional<Item> optItem = itemRepository.findById(order.getItem().getId());
 
@@ -87,6 +94,7 @@ public class OrderServiceImpl implements OrderService {
 				lineItem.setProductId(order.getItem().getId());
 				lineItem.setQuantity(order.getItem().getQuantity());
 				lineItem.setStatus("Ordered");
+				lineItem.setName(optItem.get().getName());
 				lineItem.setAmount(unitPrice * order.getItem().getQuantity());
 				lineItem.setUserId(order.getUserId());
 				lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
@@ -144,43 +152,14 @@ public class OrderServiceImpl implements OrderService {
 		if (!pageOrder.isEmpty()) {
 			pageOrder.forEach(order -> {
 
-//				orders.setOrders(findOrderById(orderId));
-//				orders.setAddress(order.getAddress());
-//				orders.setTotalAmount(order.getTotalAmount());
-//				orders.setStatus(order.getStatus());
-//				orders.setContactNo(order.getContactNo());
-//				send.add(orders);
 				List<LineItem> lineItems = lineItemRepository.findByOrderId(order.getId());
 				lineItems.forEach(lineItem -> {
-//					Optional<Item> item = itemRepository.findById(lineItem.getProductId());
-
-//					if (item.isPresent()) {
-//						order.getName().add(item.get().getName());
-////					itemList.add(item.get().getName());
-//					}
 					order.getName().add(lineItem.getName());
 
-//					orders.setName(item.get().getName());
-//					orders.setPicture(item.get().getPicture());
-//					orders.setAddress(order.getAddress());
-//					orders.setTotalAmount(order.getTotalAmount());
-//					orders.setStatus(order.getStatus());
-//					orders.setContactNo(order.getContactNo());
-//					send.add(orders);
-//					if (item.isPresent()) {
-//						order.getName().add(item.get().getName());
-////					itemList.add(item.get().getName());
-//					}
-//					order.setName(item.get().getName());
-//					order.setPicture(item.get().getPicture());
 				});
-//				order.setName(itemList);
-
 			});
 		}
-
 		return pageOrder;
-
 	}
 
 	@Override

@@ -29,8 +29,12 @@ public class LineItem {
 
 	@Transient
 	private String language;
+
 	@Transient
 	private String imageUrl;
+
+	@Transient
+	private int size;
 
 	private boolean deleted;
 	@Column(updatable = false)
@@ -153,12 +157,20 @@ public class LineItem {
 		this.imageUrl = imageUrl;
 	}
 
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
+
 	@Override
 	public String toString() {
 		return "LineItem [id=" + id + ", userId=" + userId + ", productId=" + productId + ", quantity=" + quantity
 				+ ", unitPrice=" + unitPrice + ", amount=" + amount + ", status=" + status + ", orderId=" + orderId
-				+ ", name=" + name + ", language=" + language + ", imageUrl=" + imageUrl + ", deleted=" + deleted
-				+ ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+				+ ", name=" + name + ", language=" + language + ", imageUrl=" + imageUrl + ", size=" + size
+				+ ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }
