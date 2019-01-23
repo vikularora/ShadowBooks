@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.shadow.books.Constants.DBConstants;
 import com.shadow.books.domain.Item;
 import com.shadow.books.service.ItemService;
 
@@ -47,7 +48,7 @@ public class ItemApi {
 	@Autowired
 	ItemService itemService;
 
-	final private String UPLOAD_DIRECTORY = "/home/vikul/Desktop/shadow-images";
+	final private String UPLOAD_DIRECTORY = DBConstants.UPLOAD_DIRECTORY_PATH;
 
 	@PostMapping("add")
 	public ResponseEntity<Item> add(@ModelAttribute Item item) throws Exception {
@@ -84,7 +85,7 @@ public class ItemApi {
 	@GetMapping("category/{cat}")
 	private ResponseEntity<JSONArray> listByCategory(
 			@PathVariable(name = "cat", required = true) String cat,
-			@RequestParam(required = false, name = "size", defaultValue = "15") int size,
+			@RequestParam(required = false, name = "size", defaultValue = "7") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
 		JSONArray jsonArray = new JSONArray();
 

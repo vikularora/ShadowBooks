@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.shadow.books.Constants.DBConstants;
 import com.shadow.books.domain.Address;
 import com.shadow.books.domain.Item;
 import com.shadow.books.domain.LineItem;
@@ -48,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
 	public Order add(Order order) {
 
 		order.setDeleted(false);
-		order.setStatus("Placed");
+		order.setStatus(DBConstants.PLACED);
 		order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 
@@ -60,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
 //			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 //			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 
-			List<LineItem> listItem = lineItemRepository.findByUserIdAndStatus(order.getUserId(), "Added");
+			List<LineItem> listItem = lineItemRepository.findByUserIdAndStatus(order.getUserId(), DBConstants.ADDED);
 			if (!listItem.isEmpty()) {
 
 				totalAmount = listItem.stream().collect(Collectors.summingDouble(LineItem::getAmount));
@@ -147,7 +148,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
 
-		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, "CANCELLED", page);
+		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED, page);
 
 		if (!pageOrder.isEmpty()) {
 			pageOrder.forEach(order -> {

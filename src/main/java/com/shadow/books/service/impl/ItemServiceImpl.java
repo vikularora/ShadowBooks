@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.shadow.books.Constants.DBConstants;
 import com.shadow.books.domain.Item;
 import com.shadow.books.repository.ItemRepository;
 import com.shadow.books.repository.LineItemRepository;
@@ -30,7 +31,7 @@ import com.shadow.books.service.ItemService;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-	final private String UPLOAD_DIRECTORY = "/home/vikul/Desktop/shadow-images";
+	final private String UPLOAD_DIRECTORY = DBConstants.UPLOAD_DIRECTORY_PATH;
 
 	@Autowired
 	ItemRepository itemRepository;
@@ -127,7 +128,7 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public Map<String, List<Item>> listByCategoryGroupByLanguage(String category, Pageable pageable) {
 		Map<String, List<Item>> itemsMap = new HashMap<String, List<Item>>();
-		List<String> languages = Arrays.asList("HINDI", "ENGLISH", "PUNJABI");
+		List<String> languages = Arrays.asList(DBConstants.HINDI, DBConstants.ENGLISH, DBConstants.PUNJABI);
 
 		languages.forEach(language -> {
 			logger.info("FETCHING " + category + " FOR LANGUAGE : " + language);

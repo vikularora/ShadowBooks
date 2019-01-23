@@ -100,12 +100,13 @@ public class ShoppingCartApi {
 		logger.info(itemId + "userid is :: " + userId);
 
 		lineItemService.deleteCartItemByUserId(itemId, userId);
-		return new ResponseEntity<Object>("Record Deleted Successfully ", HttpStatus.OK);
+		return new ResponseEntity<Object>("Record Deleted Successfully", HttpStatus.OK);
 	}
 
 	@PostMapping("details")
 	private ResponseEntity<CartDto> getFullCartDetails(@PathVariable("id") long userId,
 			@Valid @RequestBody CartDto cartDto) {
+
 		cartDto.setUserId(userId);
 		logger.info("GETCARTFULLDETAILS CALLED ::" + cartDto);
 

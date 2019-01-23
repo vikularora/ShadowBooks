@@ -32,11 +32,8 @@ public class UserServiceImpl implements UserService {
 		if (optUser.isPresent()) {
 			logger.info("USER ALREADY EXISTS");
 			if (optUser.get().isDeleted()) {
-//				optUser.get().setDeleted(false);
 				update(optUser.get());
 			}
-//			optUser.get().setDeleted(false);
-//			optUser.get().setModifiedOn(time);
 			optUser.get().setName(user.getName());
 			return update(optUser.get());
 		}
