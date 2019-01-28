@@ -132,11 +132,12 @@ public class UserApi {
 		return new ResponseEntity<OrderOnDemand>(orderOnDemand, HttpStatus.NO_CONTENT);
 	}
 
-	@PostMapping("suggestions")
-	public ResponseEntity<Suggestion> addUserSuggestions(@RequestBody Suggestion suggestion) throws Exception {
+	@PostMapping("{userId}/suggestions")
+	public ResponseEntity<Suggestion> addUserSuggestions(@PathVariable("userId") long userId,
+			@RequestBody Suggestion suggestion) throws Exception {
 
 		logger.info("ORDER ON DEMAND ADD BODY :: " + suggestion);
-		suggestion = suggestionService.add(suggestion);
+		suggestion = suggestionService.add(suggestion, userId);
 
 		if (suggestion != null) {
 			return new ResponseEntity<Suggestion>(suggestion, HttpStatus.CREATED);

@@ -83,17 +83,16 @@ public class ItemApi {
 	}
 
 	@GetMapping("category/{cat}")
-	private ResponseEntity<JSONArray> listByCategory(
-			@PathVariable(name = "cat", required = true) String cat,
+	private ResponseEntity<JSONArray> listByCategory(@PathVariable(name = "cat", required = true) String cat,
 			@RequestParam(required = false, name = "size", defaultValue = "7") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
+		
 		JSONArray jsonArray = new JSONArray();
 
 		Pageable pageable = PageRequest.of(page, size);
 		Map<String, List<Item>> itemsMap = itemService.listByCategoryGroupByLanguage(cat, pageable);
 
 		if (itemsMap.isEmpty()) {
-		
 			return new ResponseEntity<JSONArray>(HttpStatus.NO_CONTENT);
 		}
 		itemsMap.entrySet().forEach(entry -> {

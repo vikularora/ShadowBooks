@@ -4,6 +4,6 @@ import com.shadow.books.domain.Suggestion;
 
 public interface SuggestionService {
 
-	Suggestion add(Suggestion suggestion);
+	Suggestion add(Suggestion suggestion, long userId);
 
 }

@@ -18,6 +18,9 @@ public class Suggestion implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String message;
+	private String name;
+	private String email;
+	private String contactNumber;
 
 	private boolean deleted;
 	@Column(updatable = false)
@@ -64,9 +67,34 @@ public class Suggestion implements Serializable {
 		this.modifiedOn = modifiedOn;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public String getContactNumber() {
+		return contactNumber;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setContactNumber(String contactNumber) {
+		this.contactNumber = contactNumber;
+	}
+
 	@Override
 	public String toString() {
-		return "Suggestion [id=" + id + ", message=" + message + ", deleted=" + deleted + ", createdOn=" + createdOn
+		return "Suggestion [id=" + id + ", message=" + message + ", name=" + name + ", email=" + email
+				+ ", contactNumber=" + contactNumber + ", deleted=" + deleted + ", createdOn=" + createdOn
 				+ ", modifiedOn=" + modifiedOn + "]";
 	}
 
