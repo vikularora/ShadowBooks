@@ -19,7 +19,8 @@ public class Suggestion implements Serializable {
 	private Long id;
 	private String message;
 	private String name;
-	private String email;
+	private String email; // optional
+	private int rating;
 	private String contactNumber;
 
 	private boolean deleted;
@@ -91,10 +92,18 @@ public class Suggestion implements Serializable {
 		this.contactNumber = contactNumber;
 	}
 
+	public int getRating() {
+		return rating;
+	}
+
+	public void setRating(int rating) {
+		this.rating = rating;
+	}
+
 	@Override
 	public String toString() {
-		return "Suggestion [id=" + id + ", message=" + message + ", name=" + name + ", email=" + email
-				+ ", contactNumber=" + contactNumber + ", deleted=" + deleted + ", createdOn=" + createdOn
+		return "Suggestion [id=" + id + ", message=" + message + ", name=" + name + ", email=" + email + ", rating="
+				+ rating + ", contactNumber=" + contactNumber + ", deleted=" + deleted + ", createdOn=" + createdOn
 				+ ", modifiedOn=" + modifiedOn + "]";
 	}
 
