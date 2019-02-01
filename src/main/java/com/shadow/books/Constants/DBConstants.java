@@ -11,6 +11,7 @@ public class DBConstants {
 	public static final String PLACED = "Placed";
 	public static final String ADDED = "Added";
 	public static final String CANCELLED = "Cancelled";
+	public static final String ORDERED = "Ordered"; 
 	
 	
 }

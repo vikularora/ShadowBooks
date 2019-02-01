@@ -69,7 +69,18 @@ public class OrderServiceImpl implements OrderService {
 
 			order.setTotalAmount(totalAmount);
 			order = orderRepository.save(order);
+			
+			// Update status in line_item after order placed
 			lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
+			
+			// update quantity in item after order placed
+			listItem.forEach(item -> {
+				Optional<Item> itemDetail = itemRepository.findById(item.getProductId());
+				if (itemDetail.isPresent()) {
+					itemDetail.get().setQuantity(itemDetail.get().getQuantity() - item.getQuantity());
+					itemRepository.save(itemDetail.get());
+				}
+			});
 		} else {
 //			order.setDeleted(false);
 //			order.setStatus("Placed");
@@ -94,7 +105,7 @@ public class OrderServiceImpl implements OrderService {
 				lineItem.setOrderId(order.getId());
 				lineItem.setProductId(order.getItem().getId());
 				lineItem.setQuantity(order.getItem().getQuantity());
-				lineItem.setStatus("Ordered");
+				lineItem.setStatus(DBConstants.ORDERED);
 				lineItem.setName(optItem.get().getName());
 				lineItem.setAmount(unitPrice * order.getItem().getQuantity());
 				lineItem.setUserId(order.getUserId());
@@ -148,7 +159,8 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
 
-		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED, page);
+		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED,
+				page);
 
 		if (!pageOrder.isEmpty()) {
 			pageOrder.forEach(order -> {

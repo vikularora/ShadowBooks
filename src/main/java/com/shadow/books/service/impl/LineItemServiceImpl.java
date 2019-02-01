@@ -144,6 +144,13 @@ public class LineItemServiceImpl implements LineItemService {
 			List<LineItem> pageItems = getShoppingCartByUserId(cartDto.getUserId());
 			if (pageItems.isEmpty()) {
 				return null;
+			} else {
+				pageItems.forEach(lineItem -> {
+					if(lineItem.getLanguage() == null) {
+						
+					}
+
+				});
 			}
 			List<Address> address = addressRepository.findByIsSelectedAndUserId(true, cartDto.getUserId());
 
@@ -187,7 +194,8 @@ public class LineItemServiceImpl implements LineItemService {
 
 		SizeDto size = new SizeDto();
 
-		List<LineItem> lineItemList = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, DBConstants.ADDED);
+		List<LineItem> lineItemList = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
+				DBConstants.ADDED);
 
 		if (!lineItemList.isEmpty()) {
 

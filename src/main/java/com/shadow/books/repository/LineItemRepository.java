@@ -24,7 +24,7 @@ public interface LineItemRepository extends JpaRepository<LineItem, Long> {
 
 	@Transactional
 	@Modifying
-	@Query("update LineItem li set li.status= 'ordered', li.orderId=:orderId where li.status='added' and li.userId = :userId")
+	@Query("update LineItem li set li.status= 'Ordered', li.orderId=:orderId where li.status='added' and li.userId = :userId")
 	void setOrderIdAndStatus(@Param("orderId") Long orderId, @Param("userId") Long userId);
 
 	@Transactional

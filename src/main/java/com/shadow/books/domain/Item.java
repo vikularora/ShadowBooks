@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @SQLDelete(sql = "update item set deleted = true where id=?")
-@Where(clause = "deleted=false")
+@Where(clause = "deleted=false and quantity>=1")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Item implements Serializable {
 
