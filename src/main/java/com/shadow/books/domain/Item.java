@@ -31,6 +31,7 @@ public class Item implements Serializable {
 	private String description;
 	private String language;
 	private float price;
+	private String status;
 	private String category;
 	@Transient
 	private float discountedPrice;
@@ -155,12 +156,20 @@ public class Item implements Serializable {
 		this.imageUrl = imageUrl;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	@Override
 	public String toString() {
 		return "Item [id=" + id + ", name=" + name + ", imageUrl=" + imageUrl + ", description=" + description
-				+ ", language=" + language + ", price=" + price + ", category=" + category + ", discountedPrice="
-				+ discountedPrice + ", file=" + file + ", discount=" + discount + ", quantity=" + quantity
-				+ ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+				+ ", language=" + language + ", price=" + price + ", status=" + status + ", category=" + category
+				+ ", discountedPrice=" + discountedPrice + ", file=" + file + ", discount=" + discount + ", quantity="
+				+ quantity + ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

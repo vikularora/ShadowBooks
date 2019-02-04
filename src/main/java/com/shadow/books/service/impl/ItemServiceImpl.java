@@ -46,9 +46,10 @@ public class ItemServiceImpl implements ItemService {
 
 		String imageUrl = saveImage(inventory);
 
-		inventory.setImageUrl("/items/picture?imgPath=" + (imageUrl));
+		inventory.setImageUrl(DBConstants.IMAGE_PATH + (imageUrl));
 //		inventory.setImageUrl(imageUrl);
 		inventory.setDeleted(false);
+		inventory.setStatus(DBConstants.AVAILABLE);
 		inventory.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		inventory.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		return itemRepository.save(inventory);
@@ -83,6 +84,7 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public Item update(Item item) {
 		item.setDeleted(false);
+		item.setStatus(DBConstants.AVAILABLE);
 		item.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		return itemRepository.save(item);
 	}

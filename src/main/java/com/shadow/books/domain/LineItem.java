@@ -31,6 +31,9 @@ public class LineItem {
 	private String language;
 
 	@Transient
+	private String itemStatus;
+
+	@Transient
 	private String imageUrl;
 
 	@Transient
@@ -165,12 +168,21 @@ public class LineItem {
 		this.size = size;
 	}
 
+	public String getItemStatus() {
+		return itemStatus;
+	}
+
+	public void setItemStatus(String itemStatus) {
+		this.itemStatus = itemStatus;
+	}
+
 	@Override
 	public String toString() {
 		return "LineItem [id=" + id + ", userId=" + userId + ", productId=" + productId + ", quantity=" + quantity
 				+ ", unitPrice=" + unitPrice + ", amount=" + amount + ", status=" + status + ", orderId=" + orderId
-				+ ", name=" + name + ", language=" + language + ", imageUrl=" + imageUrl + ", size=" + size
-				+ ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+				+ ", name=" + name + ", language=" + language + ", itemStatus=" + itemStatus + ", imageUrl=" + imageUrl
+				+ ", size=" + size + ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn
+				+ "]";
 	}
 
 }

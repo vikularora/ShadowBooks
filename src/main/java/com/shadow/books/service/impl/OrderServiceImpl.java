@@ -1,10 +1,13 @@
 package com.shadow.books.service.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +29,7 @@ import com.shadow.books.service.LineItemService;
 import com.shadow.books.service.OrderService;
 
 @Service
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
 	Logger logger = LogManager.getLogger(this.getClass());
@@ -52,63 +56,107 @@ public class OrderServiceImpl implements OrderService {
 		order.setStatus(DBConstants.PLACED);
 		order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		boolean proceedWithOrder = true;
 
 		if (order.getItem() == null) {
+			// Flow from Cart
 
 			Double totalAmount = 0.0d;
-//			order.setDeleted(false);
-//			order.setStatus("Placed");
-//			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-//			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			List<LineItem> cartItems = lineItemRepository.findByUserIdAndStatus(order.getUserId(), DBConstants.ADDED);
 
-			List<LineItem> listItem = lineItemRepository.findByUserIdAndStatus(order.getUserId(), DBConstants.ADDED);
-			if (!listItem.isEmpty()) {
+			List<Item> entities = new ArrayList<Item>();
 
-				totalAmount = listItem.stream().collect(Collectors.summingDouble(LineItem::getAmount));
+			if (!cartItems.isEmpty()) {
+				for (LineItem cartItem : cartItems) {
+					Optional<Item> optItem = itemRepository.findById(cartItem.getProductId());
+
+					if (!optItem.isPresent() || optItem.get().getQuantity() < cartItem.getQuantity()) {
+						proceedWithOrder = false;
+						break;
+					}
+					optItem.get().setQuantity(optItem.get().getQuantity() - cartItem.getQuantity());
+//					System.out.println((optItem.get().getQuantity() - cartItem.getQuantity()) + "  QUANTITY :: "
+//							+ ((optItem.get().getQuantity() - cartItem.getQuantity()) == 0));
+//					optItem.get()
+//							.setStatus(((optItem.get().getQuantity() - cartItem.getQuantity()) == 0)
+//									? DBConstants.UNAVAILABLE
+//									: DBConstants.AVAILABLE);
+					if (optItem.get().getQuantity() <= 0) {
+						optItem.get().setStatus(DBConstants.UNAVAILABLE);
+
+					}
+
+					entities.add(optItem.get());
+				}
+
+				if (proceedWithOrder) {
+					totalAmount = cartItems.stream().collect(Collectors.summingDouble(LineItem::getAmount));
+					order.setTotalAmount(totalAmount);
+					order = orderRepository.save(order);
+
+					// UPDATING QTY AND STATUS IN ITEMS
+					itemRepository.saveAll(entities);
+
+					lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
+
+				} else {
+					order.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
+				}
+
+			} else {
+				order.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
 			}
 
-			order.setTotalAmount(totalAmount);
-			order = orderRepository.save(order);
-			lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
 		} else {
-//			order.setDeleted(false);
-//			order.setStatus("Placed");
-//			order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-//			order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			// Flow from Buy Now
 
 			Optional<Item> optItem = itemRepository.findById(order.getItem().getId());
+			if (optItem.isPresent() && optItem.get().getQuantity() >= order.getItem().getQuantity()) {
 
-			if (optItem.isPresent()) {
+				addShoppingCartDetailsAndPlaceOrder(optItem, order);
+				optItem.get().setQuantity(optItem.get().getQuantity() - order.getItem().getQuantity());
 
-				Double discount = (double) (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
-				double unitAmount = optItem.get().getPrice() - discount;
+				if (optItem.get().getQuantity() <= 0) {
+					optItem.get().setStatus(DBConstants.UNAVAILABLE);
+				}
 
-				order.setTotalAmount(unitAmount * order.getItem().getQuantity());
-				order = orderRepository.save(order);
+				itemRepository.save(optItem.get());
 
-				LineItem lineItem = new LineItem();
-
-				float amount = (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
-				float unitPrice = optItem.get().getPrice() - amount;
-				lineItem.setUnitPrice(unitPrice);
-				lineItem.setOrderId(order.getId());
-				lineItem.setProductId(order.getItem().getId());
-				lineItem.setQuantity(order.getItem().getQuantity());
-				lineItem.setStatus("Ordered");
-				lineItem.setName(optItem.get().getName());
-				lineItem.setAmount(unitPrice * order.getItem().getQuantity());
-				lineItem.setUserId(order.getUserId());
-				lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-				lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-				lineItem.setDeleted(false);
-
-				logger.info("LINE ITEM :: " + lineItem);
-
-				lineItemRepository.save(lineItem);
+			} else {
+				order.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
 			}
 
 		}
 		return order;
+	}
+
+	private void addShoppingCartDetailsAndPlaceOrder(Optional<Item> optItem, Order order) {
+
+		Double discount = (double) (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
+		double unitAmount = optItem.get().getPrice() - discount;
+
+		order.setTotalAmount(unitAmount * order.getItem().getQuantity());
+		order = orderRepository.save(order);
+
+		LineItem lineItem = new LineItem();
+
+		float amount = (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
+		float unitPrice = optItem.get().getPrice() - amount;
+		lineItem.setUnitPrice(unitPrice);
+		lineItem.setOrderId(order.getId());
+		lineItem.setProductId(order.getItem().getId());
+		lineItem.setQuantity(order.getItem().getQuantity());
+		lineItem.setStatus(DBConstants.PLACED);
+		lineItem.setName(optItem.get().getName());
+		lineItem.setAmount(unitPrice * order.getItem().getQuantity());
+		lineItem.setUserId(order.getUserId());
+		lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		lineItem.setDeleted(false);
+
+		logger.info("LINE ITEM :: " + lineItem);
+
+		lineItemRepository.save(lineItem);
 	}
 
 	@Override
@@ -148,7 +196,8 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
 
-		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED, page);
+		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED,
+				page);
 
 		if (!pageOrder.isEmpty()) {
 			pageOrder.forEach(order -> {

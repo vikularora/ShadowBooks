@@ -1,5 +1,6 @@
 package com.shadow.books.service.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -119,6 +120,24 @@ public class LineItemServiceImpl implements LineItemService {
 		return null;
 	}
 
+	public List<LineItem> getShoppingCartReviewDetails(Long userId) {
+		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, DBConstants.ADDED);
+		List<LineItem> lineItems = new ArrayList<LineItem>();
+		pageItems.forEach(item -> {
+			Optional<Item> optItem = itemRepository.findById(item.getProductId());
+			if (optItem.isPresent() && optItem.get().getStatus().equalsIgnoreCase(DBConstants.AVAILABLE)) {
+				item.setName(optItem.get().getName());
+				item.setLanguage(optItem.get().getLanguage());
+				item.setImageUrl(optItem.get().getImageUrl());
+				item.setItemStatus(optItem.get().getStatus());
+				lineItems.add(item);
+
+			}
+		});
+
+		return lineItems;
+	}
+
 	@Override
 	public List<LineItem> getShoppingCartByUserId(Long userId) {
 		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, DBConstants.ADDED);
@@ -128,8 +147,11 @@ public class LineItemServiceImpl implements LineItemService {
 				item.setName(optItem.get().getName());
 				item.setLanguage(optItem.get().getLanguage());
 				item.setImageUrl(optItem.get().getImageUrl());
+				item.setItemStatus(optItem.get().getStatus());
 			}
-
+//			else {
+//				item.setItemStatus(DBConstants.UNAVAILABLE);
+//			}
 		});
 
 		return pageItems;
@@ -141,7 +163,7 @@ public class LineItemServiceImpl implements LineItemService {
 
 		if (cartDto.getType().equalsIgnoreCase("cart")) {
 
-			List<LineItem> pageItems = getShoppingCartByUserId(cartDto.getUserId());
+			List<LineItem> pageItems = getShoppingCartReviewDetails(cartDto.getUserId());
 			if (pageItems.isEmpty()) {
 				return null;
 			}
@@ -153,7 +175,8 @@ public class LineItemServiceImpl implements LineItemService {
 			return cartDto;
 		} else {
 			Optional<Item> optItem = itemRepository.findById(cartDto.getProductId());
-			if (optItem.isPresent()) {
+			
+			if (optItem.isPresent() && optItem.get().getStatus().equalsIgnoreCase(DBConstants.AVAILABLE)) {
 
 				float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
 				LineItem lineItem = new LineItem();
@@ -161,6 +184,7 @@ public class LineItemServiceImpl implements LineItemService {
 				lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 				lineItem.setAmount((float) (lineItem.getUnitPrice() * cartDto.getQuantity()));
 				lineItem.setName(optItem.get().getName());
+				lineItem.setItemStatus(optItem.get().getStatus());
 				lineItem.setUserId(cartDto.getUserId());
 				lineItem.setQuantity(cartDto.getQuantity());
 				lineItem.setProductId(cartDto.getProductId());
@@ -187,7 +211,8 @@ public class LineItemServiceImpl implements LineItemService {
 
 		SizeDto size = new SizeDto();
 
-		List<LineItem> lineItemList = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, DBConstants.ADDED);
+		List<LineItem> lineItemList = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
+				DBConstants.ADDED);
 
 		if (!lineItemList.isEmpty()) {
 
