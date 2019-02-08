@@ -53,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
 	public Order add(Order order) {
 
 		order.setDeleted(false);
-		order.setStatus(DBConstants.PLACED);
+		order.setStatus(DBConstants.PENDING);
 		order.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		order.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		boolean proceedWithOrder = true;
@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
 			// Flow from Cart
 
 			Double totalAmount = 0.0d;
-			List<LineItem> cartItems = lineItemRepository.findByUserIdAndStatus(order.getUserId(), DBConstants.ADDED);
+			List<LineItem> cartItems = lineItemRepository.findByUserIdAndStatus(order.getUserId(), DBConstants.IN_CART);
 
 			List<Item> entities = new ArrayList<Item>();
 
@@ -75,17 +75,10 @@ public class OrderServiceImpl implements OrderService {
 						break;
 					}
 					optItem.get().setQuantity(optItem.get().getQuantity() - cartItem.getQuantity());
-//					System.out.println((optItem.get().getQuantity() - cartItem.getQuantity()) + "  QUANTITY :: "
-//							+ ((optItem.get().getQuantity() - cartItem.getQuantity()) == 0));
-//					optItem.get()
-//							.setStatus(((optItem.get().getQuantity() - cartItem.getQuantity()) == 0)
-//									? DBConstants.UNAVAILABLE
-//									: DBConstants.AVAILABLE);
 					if (optItem.get().getQuantity() <= 0) {
 						optItem.get().setStatus(DBConstants.UNAVAILABLE);
 
 					}
-
 					entities.add(optItem.get());
 				}
 
@@ -146,7 +139,7 @@ public class OrderServiceImpl implements OrderService {
 		lineItem.setOrderId(order.getId());
 		lineItem.setProductId(order.getItem().getId());
 		lineItem.setQuantity(order.getItem().getQuantity());
-		lineItem.setStatus(DBConstants.PLACED);
+		lineItem.setStatus(DBConstants.PENDING);
 		lineItem.setName(optItem.get().getName());
 		lineItem.setAmount(unitPrice * order.getItem().getQuantity());
 		lineItem.setUserId(order.getUserId());
@@ -196,8 +189,9 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
 
-		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED,
-				page);
+//		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED,
+//				page);
+		Page<Order> pageOrder = orderRepository.findByUserIdOrderByIdDesc(userId, page);
 
 		if (!pageOrder.isEmpty()) {
 			pageOrder.forEach(order -> {

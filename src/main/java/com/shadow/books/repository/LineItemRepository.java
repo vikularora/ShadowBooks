@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shadow.books.domain.LineItem;
+import com.shadow.books.Constants.DBConstants;
 
 @Repository
 public interface LineItemRepository extends JpaRepository<LineItem, Long> {
@@ -24,12 +25,12 @@ public interface LineItemRepository extends JpaRepository<LineItem, Long> {
 
 	@Transactional
 	@Modifying
-	@Query("update LineItem li set li.status= 'ordered', li.orderId=:orderId where li.status='added' and li.userId = :userId")
+	@Query(DBConstants.UPDATE_STATUS_AND_ORDERID)
 	void setOrderIdAndStatus(@Param("orderId") Long orderId, @Param("userId") Long userId);
 
 	@Transactional
 	@Modifying
-	@Query("update LineItem li set li.deleted= 1 where li.productId = :productId")
+	@Query(DBConstants.SET_DELETED)
 	void setDeleted(@Param("productId") Long productId);
 
 	LineItem findByUserIdAndStatusAndProductIdAndOrderIdIsNull(long userId, String string, Long productId);

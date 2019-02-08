@@ -175,7 +175,7 @@ public class ItemServiceImpl implements ItemService {
 	public List<Item> search(String name) {
 
 //		return itemRepository.findByNameOrderByIdDesc(name);
-		List<Item> items = itemRepository.findByNameOrderByIdDesc(name);
+		List<Item> items = itemRepository.findByNameStartingWithIgnoreCaseOrderByIdDesc(name);
 		items.forEach(item -> {
 			float discount = item.getPrice() * item.getDiscount() / 100;
 			item.setDiscountedPrice(item.getPrice() - discount);

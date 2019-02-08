@@ -72,7 +72,7 @@ public class LineItemServiceImpl implements LineItemService {
 			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
 			lineItem.setName(optItem.get().getName());
-			lineItem.setStatus(DBConstants.ADDED);
+			lineItem.setStatus(DBConstants.IN_CART);
 			lineItem.setUserId(lineItem.getUserId());
 
 			lineItem.setDeleted(false);
@@ -88,7 +88,7 @@ public class LineItemServiceImpl implements LineItemService {
 			Optional<Item> optItem) {
 
 		LineItem lineItemDetails = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
-				lineItem.getUserId(), "Added", lineItem.getProductId());
+				lineItem.getUserId(), DBConstants.IN_CART, lineItem.getProductId());
 
 		if (lineItemDetails != null) {
 			lineItemDetails.setQuantity(lineItemDetails.getQuantity() + lineItem.getQuantity());
@@ -108,20 +108,20 @@ public class LineItemServiceImpl implements LineItemService {
 
 			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
-			lineItem.setStatus(DBConstants.ADDED);
+			lineItem.setStatus(DBConstants.IN_CART);
 			lineItem.setUserId(userId);
 			lineItem.setName(optItem.get().getName());
 			lineItem.setDeleted(false);
 			lineItem.setOrderId(null);
 			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-			System.out.println("lineItem ::" + lineItem);
 			return lineItemRepository.save(lineItem);
 		}
 		return null;
 	}
 
 	public List<LineItem> getShoppingCartReviewDetails(Long userId) {
-		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, DBConstants.ADDED);
+		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
+				DBConstants.IN_CART);
 		List<LineItem> lineItems = new ArrayList<LineItem>();
 		pageItems.forEach(item -> {
 			Optional<Item> optItem = itemRepository.findById(item.getProductId());
@@ -140,7 +140,8 @@ public class LineItemServiceImpl implements LineItemService {
 
 	@Override
 	public List<LineItem> getShoppingCartByUserId(Long userId) {
-		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId, DBConstants.ADDED);
+		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
+				DBConstants.IN_CART);
 		pageItems.forEach(item -> {
 			Optional<Item> optItem = itemRepository.findById(item.getProductId());
 			if (optItem.isPresent()) {
@@ -149,13 +150,9 @@ public class LineItemServiceImpl implements LineItemService {
 				item.setImageUrl(optItem.get().getImageUrl());
 				item.setItemStatus(optItem.get().getStatus());
 			}
-//			else {
-//				item.setItemStatus(DBConstants.UNAVAILABLE);
-//			}
 		});
 
 		return pageItems;
-
 	}
 
 	@Override
@@ -175,7 +172,7 @@ public class LineItemServiceImpl implements LineItemService {
 			return cartDto;
 		} else {
 			Optional<Item> optItem = itemRepository.findById(cartDto.getProductId());
-			
+
 			if (optItem.isPresent() && optItem.get().getStatus().equalsIgnoreCase(DBConstants.AVAILABLE)) {
 
 				float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
@@ -193,8 +190,6 @@ public class LineItemServiceImpl implements LineItemService {
 				cartDto.getCartDetails().add(lineItem);
 			}
 
-			System.out.println(cartDto + "  :: ");
-
 			List<Address> address = addressRepository.findByIsSelectedAndUserId(true, cartDto.getUserId());
 			cartDto.setAddress(address);
 			return cartDto;
@@ -210,15 +205,13 @@ public class LineItemServiceImpl implements LineItemService {
 	public SizeDto checkCartSize(long userId) {
 
 		SizeDto size = new SizeDto();
-
 		List<LineItem> lineItemList = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
-				DBConstants.ADDED);
+				DBConstants.IN_CART);
 
 		if (!lineItemList.isEmpty()) {
 
 			size.setSize(lineItemList.size());
 			return size;
-
 		}
 		return null;
 	}

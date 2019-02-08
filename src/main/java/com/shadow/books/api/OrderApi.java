@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shadow.books.Constants.DBConstants;
 import com.shadow.books.domain.Address;
 import com.shadow.books.domain.LineItem;
 import com.shadow.books.domain.Order;
@@ -43,7 +44,13 @@ public class OrderApi {
 		Order result = orderService.add(order);
 
 		if (result != null) {
-			return new ResponseEntity<Order>(result, HttpStatus.CREATED);
+			if (result.getStatus().equalsIgnoreCase(DBConstants.PENDING)) {
+				
+				return new ResponseEntity<Order>(result, HttpStatus.CREATED);
+			} else {
+				
+				return new ResponseEntity<Order>(result, HttpStatus.NOT_MODIFIED);
+			}
 		}
 		return new ResponseEntity<Order>(result, HttpStatus.NO_CONTENT);
 	}
