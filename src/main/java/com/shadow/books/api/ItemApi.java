@@ -110,7 +110,7 @@ public class ItemApi {
 
 	@GetMapping("category/{cat}")
 	private ResponseEntity<List<ItemDto>> listByCategory(@PathVariable(name = "cat", required = true) String cat,
-			@RequestParam(required = false, name = "size", defaultValue = "7") int size,
+			@RequestParam(required = false, name = "size", defaultValue = "5") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
 
 		List<ItemDto> list = new ArrayList<ItemDto>();
