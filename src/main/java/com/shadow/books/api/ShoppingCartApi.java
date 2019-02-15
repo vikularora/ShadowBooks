@@ -48,14 +48,12 @@ public class ShoppingCartApi {
 	private ResponseEntity<SizeDto> addToCart(@PathVariable("id") long userId, @Valid @RequestBody LineItem lineItem) {
 		logger.info("userid is :: " + userId);
 		lineItem.setUserId(userId);
-		LineItem shoppingCart = lineItemService.addItemToCart(lineItem);
+		SizeDto shoppingCart = lineItemService.addItemToCart(lineItem);
 
 		if (shoppingCart != null) {
-			SizeDto size = lineItemService.checkCartSize(userId);
-			return new ResponseEntity<SizeDto>(size, HttpStatus.CREATED);
+			return new ResponseEntity<SizeDto>(shoppingCart, HttpStatus.CREATED);
 
 		}
-
 		return new ResponseEntity<SizeDto>(HttpStatus.NO_CONTENT);
 	}
 

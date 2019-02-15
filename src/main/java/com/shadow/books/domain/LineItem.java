@@ -29,15 +29,14 @@ public class LineItem {
 
 	@Transient
 	private String language;
-
 	@Transient
 	private String itemStatus;
-
 	@Transient
 	private String imageUrl;
-
 	@Transient
 	private int size;
+	@Transient
+	private int availableQuantity;
 
 	private boolean deleted;
 	@Column(updatable = false)
@@ -176,13 +175,21 @@ public class LineItem {
 		this.itemStatus = itemStatus;
 	}
 
+	public int getAvailableQuantity() {
+		return availableQuantity;
+	}
+
+	public void setAvailableQuantity(int availableQuantity) {
+		this.availableQuantity = availableQuantity;
+	}
+
 	@Override
 	public String toString() {
 		return "LineItem [id=" + id + ", userId=" + userId + ", productId=" + productId + ", quantity=" + quantity
 				+ ", unitPrice=" + unitPrice + ", amount=" + amount + ", status=" + status + ", orderId=" + orderId
 				+ ", name=" + name + ", language=" + language + ", itemStatus=" + itemStatus + ", imageUrl=" + imageUrl
-				+ ", size=" + size + ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn
-				+ "]";
+				+ ", size=" + size + ", availableQuantity=" + availableQuantity + ", deleted=" + deleted
+				+ ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

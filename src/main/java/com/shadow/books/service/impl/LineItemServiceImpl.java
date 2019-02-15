@@ -34,69 +34,110 @@ public class LineItemServiceImpl implements LineItemService {
 	@Autowired
 	AddressRepository addressRepository;
 
-//	 public ShoppingCart addItemToCart(long userId, LineItem lineItem) {
-//	 
-//	 System.out.println("------list--------"+lineItem); Optional<Item> optItem =
-//	 itemRepository.findById(lineItem.getProductId()); if (optItem.isPresent()) {
-//	 float discountPerItem = (optItem.get().getPrice() *
-//	 optItem.get().getDiscount()) / 100;
-//	 
-//	 lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
-//	 lineItem.setAmount(lineItem.getUnitPrice() * lineItem.getQuantity());
-//	 lineItem.setStatus("ADDED"); lineItem.setUserId(userId);
-//	 
-//	 lineItem.setDeleted(false);
-//	 lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).
-//	 getTimeInMillis());
-//	 lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).
-//	 getTimeInMillis());
-//	 
-//	 System.out.println("-------before save----"+lineItem);
-//	lineItemRepository.save(lineItem); } return new ShoppingCart(userId,
-//	 getShoppingCartByUserId(userId).stream().collect(Collectors.toSet())); }
+//	@Override
+//	public LineItem addItemToCart(LineItem lineItem) {
+//
+//		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
+//		LineItem result = null;
+//		if (optItem.isPresent()) {
+//
+//			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
+//
+//			LineItem isPresent = checkIfProductAlreadyExistInCart(lineItem, discountPerItem, optItem);
+//			if (isPresent != null) {
+//				return isPresent;
+//			}
+//
+//			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+//			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
+//			lineItem.setName(optItem.get().getName());
+//			lineItem.setStatus(DBConstants.IN_CART);
+//			lineItem.setUserId(lineItem.getUserId());
+//
+//			lineItem.setDeleted(false);
+//			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+//
+//			result = lineItemRepository.save(lineItem);
+//		}
+//		return result;
+//	}
+//
+//	private LineItem checkIfProductAlreadyExistInCart(LineItem lineItem, float discountPerItem,
+//			Optional<Item> optItem) {
+//
+//		LineItem lineItemDetails = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
+//				lineItem.getUserId(), DBConstants.IN_CART, lineItem.getProductId());
+//
+//		if (lineItemDetails != null) {
+//			lineItemDetails.setQuantity(lineItemDetails.getQuantity() + lineItem.getQuantity());
+//			lineItemDetails.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+//			lineItemDetails.setAmount((float) (lineItemDetails.getUnitPrice() * lineItemDetails.getQuantity()));
+//			return lineItemRepository.save(lineItemDetails);
+//		}
+//		return null;
+//	}
 
 	@Override
-	public LineItem addItemToCart(LineItem lineItem) {
+	public SizeDto addItemToCart(LineItem lineItem) {
 
 		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
-		LineItem result = null;
+		SizeDto size = null;
+
 		if (optItem.isPresent()) {
 
 			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
+			// Check If product already in cart
+			LineItem lineItemDetails = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
+					lineItem.getUserId(), DBConstants.IN_CART, lineItem.getProductId());
 
-			LineItem isPresent = checkIfProductAlreadyExistInCart(lineItem, discountPerItem, optItem);
-			if (isPresent != null) {
-				return isPresent;
+			if (lineItemDetails != null) {
+				int totalQuantity = lineItemDetails.getQuantity() + lineItem.getQuantity();
+
+				if (optItem.get().getQuantity() >= totalQuantity) {
+
+					lineItemDetails.setQuantity(lineItemDetails.getQuantity() + lineItem.getQuantity());
+					lineItemDetails.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+					lineItemDetails.setAmount((float) (lineItemDetails.getUnitPrice() * lineItemDetails.getQuantity()));
+					lineItemRepository.save(lineItemDetails);
+					size = checkCartSize(lineItem.getUserId());
+					size.setStatus(DBConstants.AVAILABLE);
+					return size;
+
+				} else {
+
+					size = checkCartSize(lineItem.getUserId());
+					size.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
+					return size;
+				}
+
+			} else {
+
+				if (optItem.get().getQuantity() >= lineItem.getQuantity()) {
+
+					lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+					lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
+					lineItem.setName(optItem.get().getName());
+					lineItem.setStatus(DBConstants.IN_CART);
+					lineItem.setUserId(lineItem.getUserId());
+					lineItem.setDeleted(false);
+					lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+					lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+					lineItemRepository.save(lineItem);
+
+					size = checkCartSize(lineItem.getUserId());
+					size.setStatus(DBConstants.AVAILABLE);
+					return size;
+
+				} else {
+					size = checkCartSize(lineItem.getUserId());
+					size.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
+					return size;
+				}
+
 			}
-
-			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
-			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
-			lineItem.setName(optItem.get().getName());
-			lineItem.setStatus(DBConstants.IN_CART);
-			lineItem.setUserId(lineItem.getUserId());
-
-			lineItem.setDeleted(false);
-			lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-
-			result = lineItemRepository.save(lineItem);
 		}
-		return result;
-	}
-
-	private LineItem checkIfProductAlreadyExistInCart(LineItem lineItem, float discountPerItem,
-			Optional<Item> optItem) {
-
-		LineItem lineItemDetails = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
-				lineItem.getUserId(), DBConstants.IN_CART, lineItem.getProductId());
-
-		if (lineItemDetails != null) {
-			lineItemDetails.setQuantity(lineItemDetails.getQuantity() + lineItem.getQuantity());
-			lineItemDetails.setUnitPrice(optItem.get().getPrice() - discountPerItem);
-			lineItemDetails.setAmount((float) (lineItemDetails.getUnitPrice() * lineItemDetails.getQuantity()));
-			return lineItemRepository.save(lineItemDetails);
-		}
-		return null;
+		return size;
 	}
 
 	@Override
@@ -140,19 +181,20 @@ public class LineItemServiceImpl implements LineItemService {
 
 	@Override
 	public List<LineItem> getShoppingCartByUserId(Long userId) {
-		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
+		List<LineItem> pageLineItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
 				DBConstants.IN_CART);
-		pageItems.forEach(item -> {
-			Optional<Item> optItem = itemRepository.findById(item.getProductId());
+		pageLineItems.forEach(lineItem -> {
+			Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
 			if (optItem.isPresent()) {
-				item.setName(optItem.get().getName());
-				item.setLanguage(optItem.get().getLanguage());
-				item.setImageUrl(optItem.get().getImageUrl());
-				item.setItemStatus(optItem.get().getStatus());
+				lineItem.setName(optItem.get().getName());
+				lineItem.setLanguage(optItem.get().getLanguage());
+				lineItem.setImageUrl(optItem.get().getImageUrl());
+				lineItem.setItemStatus(optItem.get().getStatus());
+				lineItem.setAvailableQuantity(optItem.get().getQuantity());
 			}
 		});
 
-		return pageItems;
+		return pageLineItems;
 	}
 
 	@Override
@@ -213,7 +255,8 @@ public class LineItemServiceImpl implements LineItemService {
 			size.setSize(lineItemList.size());
 			return size;
 		}
-		return null;
+		size.setSize(0);
+		return size;
 	}
 
 //	@SuppressWarnings("unchecked")
