@@ -60,15 +60,22 @@ public class OrderServiceImpl implements OrderService {
 
 		if (order.getItem() == null) {
 			// Flow from Cart
+			logger.info("FLOW GOES FROM CART :: " + order);
 
 			Double totalAmount = 0.0d;
 			List<LineItem> cartItems = lineItemRepository.findByUserIdAndStatus(order.getUserId(), DBConstants.IN_CART);
-
+			logger.info("CART DETAILS HAVING STATUS IN CART :: " + cartItems);
 			List<Item> entities = new ArrayList<Item>();
 
 			if (!cartItems.isEmpty()) {
 				for (LineItem cartItem : cartItems) {
 					Optional<Item> optItem = itemRepository.findById(cartItem.getProductId());
+					logger.info("ITEM DETAIL :: " + optItem);
+
+					if (optItem.get().getStatus().equalsIgnoreCase(DBConstants.UNAVAILABLE)) {
+						logger.info("IF ITEM IN CART ARE UNAVAILABLE" + optItem);
+						continue;
+					}
 
 					if (!optItem.isPresent() || optItem.get().getQuantity() < cartItem.getQuantity()) {
 						proceedWithOrder = false;
@@ -85,50 +92,61 @@ public class OrderServiceImpl implements OrderService {
 				if (proceedWithOrder) {
 					totalAmount = cartItems.stream().collect(Collectors.summingDouble(LineItem::getAmount));
 					order.setTotalAmount(totalAmount);
+					logger.info("BEFORE ORDER PLACING :: " + order);
 					order = orderRepository.save(order);
 
+					logger.info("BEFORE UPDATING QUANTITY AND STATUS IN ITEMS" + entities);
 					// UPDATING QTY AND STATUS IN ITEMS
 					itemRepository.saveAll(entities);
 
+					logger.info("BEFORE UPDATE ORDERID AND STATUS IN LINE ITEMS" + order);
 					lineItemRepository.setOrderIdAndStatus(order.getId(), order.getUserId());
 
 				} else {
+					logger.info("BOOK OUT OF STOCK");
 					order.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
 				}
 
 			} else {
+				logger.info("BOOK OUT OF STOCK");
 				order.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
 			}
 
 		} else {
 			// Flow from Buy Now
-
+			logger.info("FLOW GOES THROUGH BUY NOW");
 			Optional<Item> optItem = itemRepository.findById(order.getItem().getId());
+			logger.info("OPTIONAL ITEM :: " + optItem);
+
 			if (optItem.isPresent() && optItem.get().getQuantity() >= order.getItem().getQuantity()) {
 
 				addShoppingCartDetailsAndPlaceOrder(optItem, order);
 				optItem.get().setQuantity(optItem.get().getQuantity() - order.getItem().getQuantity());
 
 				if (optItem.get().getQuantity() <= 0) {
+					logger.info("UPDATE STATUS OF QUANTITY" + optItem.get().getQuantity());
 					optItem.get().setStatus(DBConstants.UNAVAILABLE);
 				}
 
+				logger.info("BEFORE UPDATE ITEM :: " + optItem);
 				itemRepository.save(optItem.get());
 
 			} else {
+				logger.info("BOOK NOT IN STOCK ");
 				order.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
 			}
-
 		}
 		return order;
 	}
 
 	private void addShoppingCartDetailsAndPlaceOrder(Optional<Item> optItem, Order order) {
 
+		logger.info("ADD SHOPPING CART DETAILS AND PLACE ORDER");
+
 		Double discount = (double) (optItem.get().getPrice() * optItem.get().getDiscount() / 100);
 		double unitAmount = optItem.get().getPrice() - discount;
-
 		order.setTotalAmount(unitAmount * order.getItem().getQuantity());
+		logger.info("BEFORE PLACING ORDER :: " + order);
 		order = orderRepository.save(order);
 
 		LineItem lineItem = new LineItem();
@@ -147,59 +165,62 @@ public class OrderServiceImpl implements OrderService {
 		lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		lineItem.setDeleted(false);
 
-		logger.info("LINE ITEM :: " + lineItem);
-
+		logger.info("BEFORE ADDING DEATAILS IN SHOPPING CART  :: " + lineItem);
 		lineItemRepository.save(lineItem);
 	}
 
 	@Override
 	public Optional<Order> updateDelevieryAddressByOrderId(Long id, Address address) {
 		address = addressService.add(address);
-		Optional<Order> optionalOrder = orderRepository.findById(id);
-		if (optionalOrder.isPresent()) {
-			optionalOrder.get().setId(optionalOrder.get().getId());
-			optionalOrder.get().setUserId(optionalOrder.get().getUserId());
-			optionalOrder.get().setAddress(formatDeliveryAddress(address));
-			optionalOrder.get().setContactNo(optionalOrder.get().getContactNo());
-			optionalOrder.get().setTotalAmount(optionalOrder.get().getTotalAmount());
-			optionalOrder.get().setStatus(optionalOrder.get().getStatus());
-			return Optional.ofNullable(orderRepository.save(optionalOrder.get()));
+		Optional<Order> optOrder = orderRepository.findById(id);
+		logger.info("OPTIONAL ORDER :: " + optOrder);
+
+		if (optOrder.isPresent()) {
+			optOrder.get().setId(optOrder.get().getId());
+			optOrder.get().setUserId(optOrder.get().getUserId());
+			optOrder.get().setAddress(formatDeliveryAddress(address));
+			optOrder.get().setContactNo(optOrder.get().getContactNo());
+			optOrder.get().setTotalAmount(optOrder.get().getTotalAmount());
+			optOrder.get().setStatus(optOrder.get().getStatus());
+			logger.info("BEFORE UPDATE ADDRESS IN ORDER REPOSITORY");
+			return Optional.ofNullable(orderRepository.save(optOrder.get()));
 		}
-		return optionalOrder;
+		return optOrder;
 	}
 
 	private String formatDeliveryAddress(Address address) {
+		logger.info("FORMAT DELIVERY ADDRESS");
 		return address.getHouseNumber() + " " + address.getStreet() + " " + address.getArea() + " "
 				+ address.getLandmark();
 	}
 
 	@Override
 	public Optional<Order> updateOrderStatus(Order order) {
-		Optional<Order> optionalOrder = orderRepository.findById(order.getId());
+		Optional<Order> optOrder = orderRepository.findById(order.getId());
 		Order fetchedorder = null;
-		if (optionalOrder.isPresent()) {
-			fetchedorder = optionalOrder.get();
+		logger.info("OPTIONAL ORDER " + optOrder);
+		if (optOrder.isPresent()) {
+			fetchedorder = optOrder.get();
 			fetchedorder.setStatus(order.getStatus());
+			logger.info("BEFORE UPDATE ORDER STATUS IN ORDER REPOSITORY :: " + fetchedorder);
 			fetchedorder = orderRepository.save(fetchedorder);
 		}
-
 		return Optional.ofNullable(fetchedorder);
 	}
 
 	@Override
 	public Page<Order> findOrdersByUserId(long userId, Pageable page) {
 
-//		Page<Order> pageOrder = orderRepository.findByUserIdAndStatusNotInIgnoreCase(userId, DBConstants.CANCELLED,
-//				page);
 		Page<Order> pageOrder = orderRepository.findByUserIdOrderByIdDesc(userId, page);
+		logger.info("GET ORDERS OF USER :: " + pageOrder);
 
 		if (!pageOrder.isEmpty()) {
 			pageOrder.forEach(order -> {
 
 				List<LineItem> lineItems = lineItemRepository.findByOrderId(order.getId());
+				logger.info("LINE ITEM DETAILS :: " + lineItems);
 				lineItems.forEach(lineItem -> {
 					order.getName().add(lineItem.getName());
-
 				});
 			});
 		}
@@ -210,15 +231,15 @@ public class OrderServiceImpl implements OrderService {
 	public List<LineItem> findOrderById(long orderId) {
 
 		List<LineItem> orderedItems = lineItemRepository.findByOrderId(orderId);
+		logger.info("ORDERED ITEMS LIST :: " + orderedItems);
+
 		orderedItems.forEach(orderedItem -> {
 			Optional<Item> optItem = itemRepository.findById(orderedItem.getProductId());
-
 			orderedItem.setName(optItem.get().getName());
 			orderedItem.setLanguage(optItem.get().getLanguage());
 			orderedItem.setImageUrl(optItem.get().getImageUrl());
 		});
 		return orderedItems;
-
 	}
 
 	@Override

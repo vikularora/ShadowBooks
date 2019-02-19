@@ -22,6 +22,8 @@ public class OrderOnDemand implements Serializable {
 	private String contactNo;
 	private String authorName;
 	private String edition;
+	private String name;
+	private String contactNumber;
 
 	private boolean deleted;
 	@Column(updatable = false)
@@ -108,11 +110,28 @@ public class OrderOnDemand implements Serializable {
 		this.modifiedOn = modifiedOn;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getContactNumber() {
+		return contactNumber;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setContactNumber(String contactNumber) {
+		this.contactNumber = contactNumber;
+	}
+
 	@Override
 	public String toString() {
 		return "OrderOnDemand [id=" + id + ", bookName=" + bookName + ", language=" + language + ", quantity="
 				+ quantity + ", contactNo=" + contactNo + ", authorName=" + authorName + ", edition=" + edition
-				+ ", deleted=" + deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+				+ ", name=" + name + ", contactNumber=" + contactNumber + ", deleted=" + deleted + ", createdOn="
+				+ createdOn + ", modifiedOn=" + modifiedOn + "]";
 	}
 
 }

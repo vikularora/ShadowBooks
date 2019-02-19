@@ -45,18 +45,19 @@ public class ItemServiceImpl implements ItemService {
 	public Item add(Item inventory) throws IOException {
 
 		String imageUrl = saveImage(inventory);
-
+		logger.info("AFTER IMAGE SAVE AND IMAGE URL IS :: " + imageUrl);
 		inventory.setImageUrl(DBConstants.IMAGE_PATH + (imageUrl));
-//		inventory.setImageUrl(imageUrl);
 		inventory.setDeleted(false);
 		inventory.setStatus(DBConstants.AVAILABLE);
 		inventory.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		inventory.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		logger.info("BEFORE ITEM IS ADDED INTO DATABASE :: " + inventory);
 		return itemRepository.save(inventory);
-
 	}
 
 	private String saveImage(Item inventory) throws IOException {
+
+		logger.info("SAVING IMG " + inventory);
 
 		MultipartFile file = inventory.getFile();
 		if (!file.isEmpty()) {
@@ -71,11 +72,11 @@ public class ItemServiceImpl implements ItemService {
 			stream.write(bytes);
 			stream.close();
 
-			logger.info("Server File Location=" + serverFile.getAbsolutePath());
-			logger.info("You successfully uploaded file=" + imageName);
+			logger.info("SERVER FILE LOCATION IS :: " + serverFile.getAbsolutePath());
+			logger.info("SUCCESSFULLY UPLOADED FILE :: " + imageName);
 			return imageName;
 		} else {
-			logger.info("Failed to upload image  because the file was empty.");
+			logger.info("FAILED TO UPLOAD IMAGE BECAUSE THE FILE WAS EMPTY.");
 			return null;
 		}
 
@@ -86,6 +87,7 @@ public class ItemServiceImpl implements ItemService {
 		item.setDeleted(false);
 		item.setStatus(DBConstants.AVAILABLE);
 		item.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		logger.info("BEFORE UPDATE ITEM :: " + item);
 		return itemRepository.save(item);
 	}
 
@@ -115,10 +117,11 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public Page<Item> listByCategoryGroupByLanguage(String category, String language, Pageable pageable) {
-//		Page<Item> items = itemRepository.findByCategoryAndLanguageAllIgnoreCase(category, language, pageable);
 
 		Page<Item> items = itemRepository.findByCategoryAndLanguageAllIgnoreCaseOrderByIdDesc(category, language,
 				pageable);
+
+		logger.info("PAGE LIST OF ITEMS :: " + items);
 
 		items.getContent().forEach(item -> {
 			float discount = item.getPrice() * item.getDiscount() / 100;
@@ -174,13 +177,11 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public List<Item> search(String name) {
 
-//		return itemRepository.findByNameOrderByIdDesc(name);
 		List<Item> items = itemRepository.findByNameStartingWithIgnoreCaseOrderByIdDesc(name);
 		items.forEach(item -> {
 			float discount = item.getPrice() * item.getDiscount() / 100;
 			item.setDiscountedPrice(item.getPrice() - discount);
 		});
-
 		return items;
 	}
 }

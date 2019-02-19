@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,8 @@ import com.shadow.books.service.AddressService;
 
 @Service
 public class AddressServiceImpl implements AddressService {
+
+	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Autowired
 	AddressRepository addressRepository;
@@ -35,6 +39,8 @@ public class AddressServiceImpl implements AddressService {
 		address.setSelected(true);
 		address.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 		address.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+
+		logger.info("BEFORE ADDRESS ADDED :: " + address);
 		return addressRepository.save(address);
 
 	}
@@ -43,6 +49,8 @@ public class AddressServiceImpl implements AddressService {
 	public Address updateSelectedStatus(Address address) {
 		changeSelected(address.getUserId());
 		Optional<Address> optList = addressRepository.findById(address.getId());
+
+		logger.info("OPTIONAL LIST OF ADDRESS" + optList);
 		if (optList.isPresent()) {
 			address.setName(optList.get().getName());
 			address.setHouseNumber(optList.get().getHouseNumber());
@@ -53,12 +61,14 @@ public class AddressServiceImpl implements AddressService {
 			address.setDeleted(false);
 			address.setSelected(true);
 			address.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			logger.info("BEFORE STATUS UPDATE OF ADDRESS" + address);
 			return addressRepository.save(address);
 		}
 		return address;
 	}
 
 	public void changeSelected(long userId) {
+		logger.info("IN CHANGE SELECTED :: " + userId);
 		addressRepository.setSelected(userId);
 	}
 
@@ -66,10 +76,16 @@ public class AddressServiceImpl implements AddressService {
 	public Address update(Address address) {
 
 		Optional<Address> optList = addressRepository.findById(address.getId());
+		logger.info("OPTIONAL LIST OF ADDRESS :: " + optList);
 
+		if (!optList.isPresent()) {
+			logger.info("ADDRESS NOT FOUND :: " + address);
+			return address;
+		}
 		address.setDeleted(false);
 		address.setSelected(optList.get().isSelected());
 		address.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		logger.info("BEFORE ADDRESS UPDATE :: " + address);
 		return addressRepository.save(address);
 	}
 

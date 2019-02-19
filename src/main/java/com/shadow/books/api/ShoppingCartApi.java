@@ -32,23 +32,14 @@ public class ShoppingCartApi {
 	@Autowired
 	private LineItemService lineItemService;
 
-//	@PostMapping()
-//	private ResponseEntity<ShoppingCart> addToCart(@PathVariable("id") long userId,
-//			@Valid @RequestBody LineItem lineItem) {
-//		logger.info("userid is :: " + userId);
-//		ShoppingCart shoppingCart = lineItemService.addItemToCart(userId, lineItem);
-//
-//		if (shoppingCart != null && !shoppingCart.getLineItems().isEmpty()) {
-//			return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.CREATED);
-//		}
-//		return new ResponseEntity<ShoppingCart>(shoppingCart, HttpStatus.NO_CONTENT);
-//	}
-
 	@PostMapping()
 	private ResponseEntity<SizeDto> addToCart(@PathVariable("id") long userId, @Valid @RequestBody LineItem lineItem) {
-		logger.info("userid is :: " + userId);
+
 		lineItem.setUserId(userId);
+
+		logger.info("CALLING ADD TO CART :: " + lineItem);
 		SizeDto shoppingCart = lineItemService.addItemToCart(lineItem);
+		logger.info("SHOPPING CART DETAILS :: " + shoppingCart);
 
 		if (shoppingCart != null) {
 			return new ResponseEntity<SizeDto>(shoppingCart, HttpStatus.CREATED);
@@ -60,9 +51,12 @@ public class ShoppingCartApi {
 	@PutMapping()
 	private ResponseEntity<LineItem> updateCartByUserId(@PathVariable("id") long userId,
 			@Valid @RequestBody LineItem lineItem) {
-		logger.info(lineItem + "PUT REQUEST IS :: " + userId);
 
-		LineItem updatedResult = lineItemService.updateCartItems(lineItem, userId);
+		lineItem.setUserId(userId);
+		logger.info("CALLING UPDATE CART BY USERID :: " + lineItem);
+		LineItem updatedResult = lineItemService.updateCartItems(lineItem);
+		logger.info("UPDATED CART BY USERID :: " + updatedResult);
+
 		if (updatedResult != null) {
 			return new ResponseEntity<LineItem>(updatedResult, HttpStatus.OK);
 		}
@@ -72,7 +66,9 @@ public class ShoppingCartApi {
 	@GetMapping()
 	private ResponseEntity<List<LineItem>> list(@PathVariable(name = "id", required = true) Long id) {
 
+		logger.info("CALLING LIST OF CART ITEMS BY USER ID :: " + id);
 		List<LineItem> cartItems = lineItemService.getShoppingCartByUserId(id);
+		logger.info("LIST OF CART ITEMS :: " + cartItems);
 
 		if (cartItems.isEmpty()) {
 			return new ResponseEntity<List<LineItem>>(HttpStatus.NO_CONTENT);
@@ -95,8 +91,8 @@ public class ShoppingCartApi {
 	@DeleteMapping("{itemId}")
 	private ResponseEntity<Object> deleteCartItemByUserId(@PathVariable("id") long userId,
 			@PathVariable("itemId") long itemId) {
-		logger.info(itemId + "userid is :: " + userId);
 
+		logger.info("CALLING DELETE WHERE PRODUCT ID IS ::" + itemId + "AND USERID IS :: " + userId);
 		lineItemService.deleteCartItemByUserId(itemId, userId);
 		return new ResponseEntity<Object>("Record Deleted Successfully", HttpStatus.OK);
 	}
@@ -106,9 +102,9 @@ public class ShoppingCartApi {
 			@Valid @RequestBody CartDto cartDto) {
 
 		cartDto.setUserId(userId);
-		logger.info("GETCARTFULLDETAILS CALLED ::" + cartDto);
-
+		logger.info("CALLING FULL CART DETAILS  ::" + cartDto);
 		CartDto cartDetails = lineItemService.getCartFullDetails(cartDto);
+		logger.info("LIST OF CART DETAILS :: " + cartDetails);
 
 		if (cartDetails != null) {
 			return new ResponseEntity<CartDto>(cartDetails, HttpStatus.OK);

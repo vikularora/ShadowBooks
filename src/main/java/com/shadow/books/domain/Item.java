@@ -38,7 +38,7 @@ public class Item implements Serializable {
 	@Transient
 	private MultipartFile file;
 	private float discount;
-	private long quantity;
+	private int quantity;
 	private boolean deleted;
 	@Column(updatable = false)
 	private long createdOn;
@@ -124,14 +124,6 @@ public class Item implements Serializable {
 		this.discount = discount;
 	}
 
-	public int getQuantity() {
-		return (int) quantity;
-	}
-
-	public void setQuantity(long quantity) {
-		this.quantity = quantity;
-	}
-
 	public Integer getDiscountedPrice() {
 		return (int) discountedPrice;
 	}
@@ -162,6 +154,14 @@ public class Item implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 
 	@Override

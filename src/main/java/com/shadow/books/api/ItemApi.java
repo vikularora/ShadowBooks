@@ -52,28 +52,32 @@ public class ItemApi {
 	@PostMapping("add")
 	public ResponseEntity<Item> add(@ModelAttribute Item item) throws Exception {
 
-		Item result = itemService.add(item);
+		logger.info("CALLING ADD ITEM :: " + item);
+		Item addedItem = itemService.add(item);
+		logger.info("ADDED ITEMS :: " + addedItem);
 
-		if (result != null) {
-			result.setFile(null);
-			return new ResponseEntity<Item>(result, HttpStatus.CREATED);
+		if (addedItem != null) {
+			addedItem.setFile(null);
+			return new ResponseEntity<Item>(addedItem, HttpStatus.CREATED);
 		}
-		return new ResponseEntity<Item>(result, HttpStatus.NO_CONTENT);
+		return new ResponseEntity<Item>(addedItem, HttpStatus.NO_CONTENT);
 	}
 
-	@PostMapping("addImage")
-	public ResponseEntity<Item> addImage(@RequestParam("file") MultipartFile file) throws Exception {
-
-		logger.info("ADD IMAGE ::" + file.getBytes());
-
-		return new ResponseEntity<Item>(HttpStatus.NO_CONTENT);
-
-	}
+//	@PostMapping("addImage")
+//	public ResponseEntity<Item> addImage(@RequestParam("file") MultipartFile file) throws Exception {
+//
+//		logger.info("ADD IMAGE ::" + file.getBytes());
+//
+//		return new ResponseEntity<Item>(HttpStatus.NO_CONTENT);
+//
+//	}
 
 	@PutMapping("update")
 	public ResponseEntity<Item> update(@RequestBody Item item) throws Exception {
 
+		logger.info("CALLING UPDATE ITEM :: " + item);
 		item = itemService.update(item);
+		logger.info("UPDATED ITEM :: " + item);
 
 		if (item != null) {
 			return new ResponseEntity<Item>(item, HttpStatus.OK);
@@ -114,9 +118,11 @@ public class ItemApi {
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
 
 		List<ItemDto> list = new ArrayList<ItemDto>();
-
 		Pageable pageable = PageRequest.of(page, size);
+
+		logger.info("CALLING LIST OF ITEMS ON THE BASIS OF CATEGORY :: " + cat);
 		Map<String, List<Item>> itemsMap = itemService.listByCategoryGroupByLanguage(cat, pageable);
+		logger.info("LIST OF ITEMS IN MAP FORM :: " + itemsMap);
 
 		if (itemsMap.isEmpty()) {
 			return new ResponseEntity<List<ItemDto>>(HttpStatus.NO_CONTENT);
@@ -128,6 +134,7 @@ public class ItemApi {
 			itemDto.setList(entry.getValue());
 			list.add(itemDto);
 		});
+		logger.info("LIST OF ITEMS :: " + list);
 		return new ResponseEntity<List<ItemDto>>(list, HttpStatus.OK);
 	}
 
@@ -138,8 +145,10 @@ public class ItemApi {
 			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
 
+		logger.info("CALLING LIST OF CATEGORY :: " + category + " AND LANGUAGE ::" + language);
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Item> optList = itemService.listByCategoryGroupByLanguage(category, language, pageable);
+		logger.info("LIST OF ITEMS  :: " + optList);
 
 		if (optList.isEmpty()) {
 			return new ResponseEntity<Page<Item>>(HttpStatus.NO_CONTENT);
@@ -151,7 +160,10 @@ public class ItemApi {
 	@GetMapping("list/{id}")
 	public ResponseEntity<Optional<Item>> getById(@PathVariable(name = "id", required = true) Long id)
 			throws Exception {
+
+		logger.info("CALLING LIST BY ID :: " + id);
 		Optional<Item> optItem = itemService.finById(id);
+		logger.info("LIST BY ID ITEM :: " + optItem);
 
 		if (optItem.isPresent()) {
 			return new ResponseEntity<Optional<Item>>(optItem, HttpStatus.OK);
@@ -162,6 +174,7 @@ public class ItemApi {
 	@CrossOrigin
 	@DeleteMapping("delete/{id}")
 	public void delete(@PathVariable(name = "id", required = true) Long id) throws Exception {
+		logger.info("CALLING DELETE ITEM :: " + id);
 		itemService.delete(id);
 	}
 
@@ -176,7 +189,10 @@ public class ItemApi {
 //	}
 	@GetMapping("search")
 	private ResponseEntity<List<Item>> search(@RequestParam("name") String name) {
+
+		logger.info("SEARCH ITEM BY NAME :: " + name);
 		List<Item> searchedItems = itemService.search(name);
+		logger.info("SEARCHED ITEMS :: " + searchedItems);
 
 		if (searchedItems.isEmpty()) {
 			return new ResponseEntity<List<Item>>(HttpStatus.NO_CONTENT);
@@ -186,6 +202,8 @@ public class ItemApi {
 
 	@GetMapping("picture")
 	public ResponseEntity<ByteArrayResource> downloadFile(@RequestParam("imgPath") String imgPath) {
+
+		logger.info("CALLING GET IMAGE :: " + imgPath);
 
 		String rpath = UPLOAD_DIRECTORY;
 		rpath = rpath + "/" + imgPath; // whatever path you used for storing the file

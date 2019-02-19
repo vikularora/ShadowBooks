@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import com.shadow.books.service.SuggestionService;
 @Service
 public class SuggestionServiceImpl implements SuggestionService {
 
+	Logger logger = LogManager.getLogger(this.getClass());
+
 	@Autowired
 	SuggestionRepository suggestionRepository;
 
@@ -25,16 +29,20 @@ public class SuggestionServiceImpl implements SuggestionService {
 	@Override
 	public Suggestion add(Suggestion suggestion, long userId) {
 
-		Optional<User> userDetails = userRepository.findById(userId);
+		Optional<User> userDetail = userRepository.findById(userId);
+		logger.info("OPTIONAL USER DETAIL :: " + userDetail);
 
-		if (userDetails.isPresent()) {
+		if (userDetail.isPresent()) {
+			logger.info("USER PRESENT");
 			suggestion.setDeleted(false);
 			suggestion.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 			suggestion.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
-			suggestion.setName(userDetails.get().getName());
-			suggestion.setContactNumber(userDetails.get().getContactNo());
+			suggestion.setName(userDetail.get().getName());
+			suggestion.setContactNumber(userDetail.get().getContactNo());
+			logger.info("BEFORE SUGGESTION SAVED");
 			return suggestionRepository.save(suggestion);
 		}
+		logger.info("USER NOT PRESENT");
 		return null;
 	}
 }

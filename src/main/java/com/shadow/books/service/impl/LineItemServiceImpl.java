@@ -8,6 +8,8 @@ import java.util.TimeZone;
 
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ import com.shadow.books.service.LineItemService;
 
 @Service
 public class LineItemServiceImpl implements LineItemService {
+
+	Logger logger = LogManager.getLogger(this.getClass());
 
 	@Autowired
 	LineItemRepository lineItemRepository;
@@ -83,23 +87,28 @@ public class LineItemServiceImpl implements LineItemService {
 
 		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
 		SizeDto size = null;
+		logger.info("OPTIONAL ITEM :: " + optItem);
 
 		if (optItem.isPresent()) {
 
 			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
-			// Check If product already in cart
-			LineItem lineItemDetails = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
+			logger.info("CHECKING IF PRODUCT ALREADY EXISTS IN CART ");
+			LineItem lineItemDetail = lineItemRepository.findByUserIdAndStatusAndProductIdAndOrderIdIsNull(
 					lineItem.getUserId(), DBConstants.IN_CART, lineItem.getProductId());
 
-			if (lineItemDetails != null) {
-				int totalQuantity = lineItemDetails.getQuantity() + lineItem.getQuantity();
+			if (lineItemDetail != null) {
+				logger.info("PRODUCT ALREADY IN CART :: " + lineItemDetail);
+				int totalQuantity = lineItemDetail.getQuantity() + lineItem.getQuantity();
 
 				if (optItem.get().getQuantity() >= totalQuantity) {
 
-					lineItemDetails.setQuantity(lineItemDetails.getQuantity() + lineItem.getQuantity());
-					lineItemDetails.setUnitPrice(optItem.get().getPrice() - discountPerItem);
-					lineItemDetails.setAmount((float) (lineItemDetails.getUnitPrice() * lineItemDetails.getQuantity()));
-					lineItemRepository.save(lineItemDetails);
+					logger.info("QUANTITY AVAILABLE");
+					lineItemDetail.setQuantity(lineItemDetail.getQuantity() + lineItem.getQuantity());
+					lineItemDetail.setUnitPrice(optItem.get().getPrice() - discountPerItem);
+					lineItemDetail.setAmount((float) (lineItemDetail.getUnitPrice() * lineItemDetail.getQuantity()));
+					logger.info("BEFORE UPDATING LINEITEMS");
+					lineItemRepository.save(lineItemDetail);
+
 					size = checkCartSize(lineItem.getUserId());
 					size.setStatus(DBConstants.AVAILABLE);
 					return size;
@@ -112,9 +121,10 @@ public class LineItemServiceImpl implements LineItemService {
 				}
 
 			} else {
-
+				logger.info("PRODUCT NOT EXISTS IN CART");
 				if (optItem.get().getQuantity() >= lineItem.getQuantity()) {
 
+					logger.info("QUANTITY AVAILABLE");
 					lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 					lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
 					lineItem.setName(optItem.get().getName());
@@ -123,6 +133,7 @@ public class LineItemServiceImpl implements LineItemService {
 					lineItem.setDeleted(false);
 					lineItem.setCreatedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
 					lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+					logger.info("BEFORE UPDATING LINE ITEMS");
 					lineItemRepository.save(lineItem);
 
 					size = checkCartSize(lineItem.getUserId());
@@ -134,27 +145,29 @@ public class LineItemServiceImpl implements LineItemService {
 					size.setStatus(DBConstants.BOOK_OUT_OF_STOCK);
 					return size;
 				}
-
 			}
 		}
 		return size;
 	}
 
 	@Override
-	public LineItem updateCartItems(@Valid LineItem lineItem, Long userId) {
+	public LineItem updateCartItems(@Valid LineItem lineItem) {
 
 		Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
+		logger.info("OPTIONAL ITEM DETAIL :: " + optItem);
+
 		if (optItem.isPresent()) {
 			float discountPerItem = (optItem.get().getPrice() * optItem.get().getDiscount()) / 100;
 
 			lineItem.setUnitPrice(optItem.get().getPrice() - discountPerItem);
 			lineItem.setAmount((float) (lineItem.getUnitPrice() * lineItem.getQuantity()));
 			lineItem.setStatus(DBConstants.IN_CART);
-			lineItem.setUserId(userId);
+			lineItem.setUserId(lineItem.getUserId());
 			lineItem.setName(optItem.get().getName());
 			lineItem.setDeleted(false);
 			lineItem.setOrderId(null);
 			lineItem.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+			logger.info("BEFORE UPDATE LINE ITEM :: " + lineItem);
 			return lineItemRepository.save(lineItem);
 		}
 		return null;
@@ -163,16 +176,19 @@ public class LineItemServiceImpl implements LineItemService {
 	public List<LineItem> getShoppingCartReviewDetails(Long userId) {
 		List<LineItem> pageItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
 				DBConstants.IN_CART);
+
+		logger.info("LIST OF CART DETAILS :: " + pageItems);
 		List<LineItem> lineItems = new ArrayList<LineItem>();
+
 		pageItems.forEach(item -> {
 			Optional<Item> optItem = itemRepository.findById(item.getProductId());
+			logger.info("ITEM OPTIONAL LIST :: " + optItem);
 			if (optItem.isPresent() && optItem.get().getStatus().equalsIgnoreCase(DBConstants.AVAILABLE)) {
 				item.setName(optItem.get().getName());
 				item.setLanguage(optItem.get().getLanguage());
 				item.setImageUrl(optItem.get().getImageUrl());
 				item.setItemStatus(optItem.get().getStatus());
 				lineItems.add(item);
-
 			}
 		});
 
@@ -183,8 +199,11 @@ public class LineItemServiceImpl implements LineItemService {
 	public List<LineItem> getShoppingCartByUserId(Long userId) {
 		List<LineItem> pageLineItems = lineItemRepository.findByUserIdAndStatusAndOrderIdIsNull(userId,
 				DBConstants.IN_CART);
+
+		logger.info("LIST OF LINE ITEMS :: " + pageLineItems);
 		pageLineItems.forEach(lineItem -> {
 			Optional<Item> optItem = itemRepository.findById(lineItem.getProductId());
+			logger.info("OPTIONAL ITEM DETAIL :: " + optItem);
 			if (optItem.isPresent()) {
 				lineItem.setName(optItem.get().getName());
 				lineItem.setLanguage(optItem.get().getLanguage());
@@ -193,7 +212,6 @@ public class LineItemServiceImpl implements LineItemService {
 				lineItem.setAvailableQuantity(optItem.get().getQuantity());
 			}
 		});
-
 		return pageLineItems;
 	}
 
@@ -202,18 +220,25 @@ public class LineItemServiceImpl implements LineItemService {
 
 		if (cartDto.getType().equalsIgnoreCase("cart")) {
 
+			logger.info("ORDER REVIEW THROUGH CART");
 			List<LineItem> pageItems = getShoppingCartReviewDetails(cartDto.getUserId());
+			logger.info("SHOPPING CART REVIEW DETAILS :: " + pageItems);
+
 			if (pageItems.isEmpty()) {
 				return null;
 			}
 			List<Address> address = addressRepository.findByIsSelectedAndUserId(true, cartDto.getUserId());
+			logger.info("REVIEW ADDRESS :: " + address);
 
 			cartDto.setAddress(address);
 			cartDto.setCartDetails(pageItems);
-
 			return cartDto;
+
 		} else {
+
+			logger.info("ORDER REVIEW THROUGH BUY NOW");
 			Optional<Item> optItem = itemRepository.findById(cartDto.getProductId());
+			logger.info("OPTIONAL ITEM DETAIL :: " + optItem);
 
 			if (optItem.isPresent() && optItem.get().getStatus().equalsIgnoreCase(DBConstants.AVAILABLE)) {
 
@@ -230,9 +255,11 @@ public class LineItemServiceImpl implements LineItemService {
 				lineItem.setLanguage(optItem.get().getLanguage());
 				lineItem.setImageUrl(optItem.get().getImageUrl());
 				cartDto.getCartDetails().add(lineItem);
+				logger.info("CART REVIEW DETAILS :: " + cartDto);
 			}
 
 			List<Address> address = addressRepository.findByIsSelectedAndUserId(true, cartDto.getUserId());
+			logger.info("REVIEW ADDRESS :: " + address);
 			cartDto.setAddress(address);
 			return cartDto;
 		}

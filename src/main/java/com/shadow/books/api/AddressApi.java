@@ -33,16 +33,20 @@ public class AddressApi {
 	@PostMapping("{userId}/address/add")
 	public ResponseEntity<Address> add(@PathVariable(name = "userId", required = true) Long userId,
 			@RequestBody Address address) throws Exception {
+
 		if (userId < 1) {
 			return null;
 		}
 		address.setUserId(userId);
-		Address result = addressService.add(address);
 
-		if (result != null) {
-			return new ResponseEntity<Address>(result, HttpStatus.CREATED);
+		logger.info("CAllING ADDRESS ADD :: " + address);
+		Address addedAddress = addressService.add(address);
+
+		logger.info("ADDED ADDRESS :: " + addedAddress);
+		if (addedAddress != null) {
+			return new ResponseEntity<Address>(addedAddress, HttpStatus.CREATED);
 		}
-		return new ResponseEntity<Address>(result, HttpStatus.NO_CONTENT);
+		return new ResponseEntity<Address>(addedAddress, HttpStatus.NO_CONTENT);
 	}
 
 	@CrossOrigin
@@ -51,12 +55,15 @@ public class AddressApi {
 			@RequestBody Address address) throws Exception {
 
 		address.setUserId(userId);
-		Address result = addressService.updateSelectedStatus(address);
+		logger.info("UPDATE ADDRESS STATUS :: " + address);
 
-		if (result != null) {
-			return new ResponseEntity<Address>(result, HttpStatus.OK);
+		Address updatedAddress = addressService.updateSelectedStatus(address);
+		logger.info("UPDATED STATUS :: " + updatedAddress);
+
+		if (updatedAddress != null) {
+			return new ResponseEntity<Address>(updatedAddress, HttpStatus.OK);
 		}
-		return new ResponseEntity<Address>(result, HttpStatus.NOT_MODIFIED);
+		return new ResponseEntity<Address>(updatedAddress, HttpStatus.NOT_MODIFIED);
 	}
 
 	@CrossOrigin
@@ -68,7 +75,10 @@ public class AddressApi {
 			return null;
 		}
 		address.setUserId(userId);
+
+		logger.info("CALLING UPDATE ADDRESS :: " + address);
 		address = addressService.update(address);
+		logger.info("UPDATED ADDRESS :: " + address);
 
 		if (address != null) {
 			return new ResponseEntity<Address>(address, HttpStatus.OK);
@@ -83,7 +93,10 @@ public class AddressApi {
 			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
 			@RequestParam(required = false, name = "filter") String filter) throws Exception {
 
+		logger.info("CALLING ADDRESS LIST AND USERID IS :: " + userId);
 		Page<Address> addressList = addressService.list(page, size, userId);
+
+		logger.info("ADDRESS LIST ::" + addressList);
 
 		if (addressList.getContent() == null) {
 			return new ResponseEntity<Page<Address>>(HttpStatus.NO_CONTENT);
@@ -94,6 +107,7 @@ public class AddressApi {
 	@CrossOrigin
 	@DeleteMapping("{userId}/address/delete/{id}")
 	public void delete(@PathVariable(name = "id", required = true) Long id) throws Exception {
+		logger.info("CALLING DELETE ADDRESS");
 		addressService.delete(id);
 	}
 }

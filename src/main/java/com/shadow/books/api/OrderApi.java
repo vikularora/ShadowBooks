@@ -40,15 +40,15 @@ public class OrderApi {
 	@PostMapping()
 	public ResponseEntity<Order> add(@RequestBody Order order) throws Exception {
 
-		logger.info("ORDER ADD BODY :: " + order);
+		logger.info("CALLING ORDER ADD :: " + order);
 		Order result = orderService.add(order);
 
 		if (result != null) {
 			if (result.getStatus().equalsIgnoreCase(DBConstants.PENDING)) {
-				
+
 				return new ResponseEntity<Order>(result, HttpStatus.CREATED);
 			} else {
-				
+
 				return new ResponseEntity<Order>(result, HttpStatus.NOT_MODIFIED);
 			}
 		}
@@ -59,19 +59,24 @@ public class OrderApi {
 	@PutMapping("{id}/address")
 	public ResponseEntity<Optional<Order>> updateOrders(@RequestBody Address address,
 			@PathVariable(name = "id", required = true) Long id) throws Exception {
-		Optional<Order> optionalOrder = orderService.updateDelevieryAddressByOrderId(id, address);
 
-		if (optionalOrder.isPresent()) {
-			return new ResponseEntity<Optional<Order>>(optionalOrder, HttpStatus.OK);
+		logger.info("CALLING UPDATE DELEVIERY ADDRESS BY ORDERID :: " + address);
+		Optional<Order> optOrder = orderService.updateDelevieryAddressByOrderId(id, address);
+		logger.info("UPDATED DELEVIERY ADDRESS :: " + optOrder);
+
+		if (optOrder.isPresent()) {
+			return new ResponseEntity<Optional<Order>>(optOrder, HttpStatus.OK);
 		}
-		return new ResponseEntity<Optional<Order>>(optionalOrder, HttpStatus.NOT_MODIFIED);
+		return new ResponseEntity<Optional<Order>>(optOrder, HttpStatus.NOT_MODIFIED);
 	}
 
 	@CrossOrigin
 	@PutMapping()
 	public ResponseEntity<Optional<Order>> updateOrderStatus(@RequestBody Order order) throws Exception {
 
+		logger.info("CALLING UPDATE ORDER STATUS :: " + order);
 		Optional<Order> optionalOrder = orderService.updateOrderStatus(order);
+		logger.info("UPDATED ORDER STATUS :: " + optionalOrder);
 
 		if (optionalOrder.isPresent()) {
 			return new ResponseEntity<Optional<Order>>(optionalOrder, HttpStatus.OK);
@@ -82,7 +87,10 @@ public class OrderApi {
 	@GetMapping("{id}")
 	public ResponseEntity<List<LineItem>> orderById(@PathVariable("id") long id) {
 
+		logger.info("CALLING FIND ORDER BY ID:: " + id);
 		List<LineItem> orderedItems = orderService.findOrderById(id);
+		logger.info("ORDERED ITEMS LIST :: " + orderedItems);
+
 		if (!orderedItems.isEmpty()) {
 			return new ResponseEntity<List<LineItem>>(orderedItems, HttpStatus.OK);
 		}
@@ -97,7 +105,10 @@ public class OrderApi {
 			@RequestParam(required = false, name = "status", defaultValue = "") String status) {
 
 		Pageable pageable = PageRequest.of(page, size);
+		logger.info("CALLING ALL ORDER LIST");
 		Page<Order> orders = orderService.findAll(status, pageable);
+		logger.info("ORDERED LIST :: " + orders);
+
 		if (!orders.isEmpty()) {
 			return new ResponseEntity<Page<Order>>(orders, HttpStatus.OK);
 		}

@@ -51,7 +51,10 @@ public class UserApi {
 	@CrossOrigin
 	@PostMapping("add")
 	public ResponseEntity<User> add(@RequestBody User user) throws Exception {
+
+		logger.info("CALLING ADD USER :: " + user);
 		user = userService.add(user);
+		logger.info("ADDED USER DETAIL :: " + user);
 
 		if (user != null) {
 			logger.info("USER NOT NULL:: " + user);
@@ -65,7 +68,9 @@ public class UserApi {
 	@PutMapping("update")
 	public ResponseEntity<User> update(@RequestBody User user) throws Exception {
 
+		logger.info("CALLING UPDATE USER :: " + user);
 		user = userService.update(user);
+		logger.info("UPDATED USER :: " + user);
 
 		if (user != null) {
 			return new ResponseEntity<User>(user, HttpStatus.OK);
@@ -79,7 +84,9 @@ public class UserApi {
 			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
 			@RequestParam(required = false, name = "filter") String filter) throws Exception {
 
+		logger.info("CALLING LIST OF USERS");
 		Page<User> usersList = userService.list(page, size);
+		logger.info("USERS LIST :: " + usersList);
 
 		if (usersList.getContent() == null) {
 			return new ResponseEntity<Page<User>>(HttpStatus.NO_CONTENT);
@@ -92,10 +99,13 @@ public class UserApi {
 	@GetMapping("list/{id}")
 	public ResponseEntity<Optional<User>> getById(@PathVariable(name = "id", required = true) Long id)
 			throws Exception {
-		Optional<User> opUser = userService.finById(id);
 
-		if (opUser.isPresent()) {
-			return new ResponseEntity<Optional<User>>(opUser, HttpStatus.OK);
+		logger.info("CALLING LIST BY ID :: " + id);
+		Optional<User> optUser = userService.finById(id);
+		logger.info("LIST OF USER :: " + optUser);
+
+		if (optUser.isPresent()) {
+			return new ResponseEntity<Optional<User>>(optUser, HttpStatus.OK);
 		}
 		return new ResponseEntity<Optional<User>>(HttpStatus.NO_CONTENT);
 	}
@@ -103,6 +113,7 @@ public class UserApi {
 	@CrossOrigin
 	@DeleteMapping("delete/{id}")
 	public void delete(@PathVariable(name = "id", required = true) Long id) throws Exception {
+		logger.info("DELETE USER BY ID :: " + id);
 		userService.delete(id);
 	}
 
@@ -112,7 +123,10 @@ public class UserApi {
 			@RequestParam(required = false, name = "size", defaultValue = "10") int size) {
 
 		Pageable pageable = PageRequest.of(page, size);
+		logger.info("CALLING GET USERS ORDERS BY USER ID :: " + userId);
 		Page<Order> orderList = orderService.findOrdersByUserId(userId, pageable);
+		logger.info("ORDERS LIST :: " + orderList);
+
 		if (orderList != null) {
 			return new ResponseEntity<Page<Order>>(orderList, HttpStatus.OK);
 		}
@@ -120,11 +134,13 @@ public class UserApi {
 
 	}
 
-	@PostMapping("on_demand/orders")
-	public ResponseEntity<OrderOnDemand> addOnDemandOrder(@RequestBody OrderOnDemand orderOnDemand) throws Exception {
+	@PostMapping("{userId}/on_demand")
+	public ResponseEntity<OrderOnDemand> addOnDemandOrder(@PathVariable("userId") long userId,
+			@RequestBody OrderOnDemand orderOnDemand) throws Exception {
 
-		logger.info("ORDER ON DEMAND ADD BODY :: " + orderOnDemand);
-		orderOnDemand = orderOnDemandService.addOnDemandOrder(orderOnDemand);
+		logger.info("CALLING ORDER ON DEMAND :: " + orderOnDemand);
+		orderOnDemand = orderOnDemandService.addOnDemandOrder(orderOnDemand, userId);
+		logger.info("ORDER DETAILS :: " + orderOnDemand);
 
 		if (orderOnDemand != null) {
 			return new ResponseEntity<OrderOnDemand>(orderOnDemand, HttpStatus.CREATED);
@@ -136,13 +152,13 @@ public class UserApi {
 	public ResponseEntity<Suggestion> addUserSuggestions(@PathVariable("userId") long userId,
 			@RequestBody Suggestion suggestion) throws Exception {
 
-		logger.info("ORDER ON DEMAND ADD BODY :: " + suggestion);
+		logger.info("CALLING SUGGESTIONS :: " + suggestion);
 		suggestion = suggestionService.add(suggestion, userId);
+		logger.info("ADDED SUGGESTIONS :: " + suggestion);
 
 		if (suggestion != null) {
 			return new ResponseEntity<Suggestion>(suggestion, HttpStatus.CREATED);
 		}
 		return new ResponseEntity<Suggestion>(suggestion, HttpStatus.NO_CONTENT);
 	}
-
 }

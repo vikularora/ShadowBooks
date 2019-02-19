@@ -25,15 +25,19 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User add(User user) {
-		long time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
 
+		long time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis();
 		Optional<User> optUser = userRepository.findByContactNo(user.getContactNo());
+		logger.info("GET OPTIONAL USER BY CONTACT NUMBER :: " + optUser);
 
 		if (optUser.isPresent()) {
-			logger.info("USER ALREADY EXISTS");
+			logger.info("USER ALREADY EXISTS ");
+
 			if (optUser.get().isDeleted()) {
+				logger.info("UPDATE USER DELETED STATUS");
 				update(optUser.get());
 			}
+
 			optUser.get().setName(user.getName());
 			return update(optUser.get());
 		}
@@ -41,6 +45,7 @@ public class UserServiceImpl implements UserService {
 		user.setDeleted(false);
 		user.setCreatedOn(time);
 		user.setModifiedOn(time);
+		logger.info("BEFORE JOINING NEW USER :: " + user);
 		return userRepository.save(user);
 	}
 
@@ -48,6 +53,7 @@ public class UserServiceImpl implements UserService {
 	public User update(User user) {
 		user.setDeleted(false);
 		user.setModifiedOn(Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis());
+		logger.info("BEFORE UPDATE USER :: " + user);
 		return userRepository.save(user);
 	}
 
@@ -67,7 +73,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void delete(Long id) {
 		Optional<User> optUser = finById(id);
+		logger.info("DELETE USER" + optUser);
 		if (optUser.isPresent()) {
+			logger.info("USER PRESENT");
 			userRepository.deleteById(id);
 		}
 	}

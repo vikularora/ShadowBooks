@@ -12,7 +12,7 @@ public interface LineItemService {
 
 //	public ShoppingCart addItemToCart(ShoppingCart shoppingCart);
 
-	public LineItem updateCartItems(@Valid LineItem lineItem, Long userId);
+	public LineItem updateCartItems(@Valid LineItem lineItem);
 
 	public List<LineItem> getShoppingCartByUserId(Long userId);
 
