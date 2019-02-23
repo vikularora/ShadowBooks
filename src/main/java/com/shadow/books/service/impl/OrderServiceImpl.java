@@ -81,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
 						proceedWithOrder = false;
 						break;
 					}
+
 					optItem.get().setQuantity(optItem.get().getQuantity() - cartItem.getQuantity());
 					if (optItem.get().getQuantity() <= 0) {
 						optItem.get().setStatus(DBConstants.UNAVAILABLE);

@@ -84,11 +84,11 @@ public class UserApi {
 			@RequestParam(required = false, name = "size", defaultValue = "10") int size,
 			@RequestParam(required = false, name = "filter") String filter) throws Exception {
 
-		logger.info("CALLING LIST OF USERS");
+		logger.info("INSIDE LIST OF USERS WITH :: "+page+" -- "+size+" -- "+filter);
 		Page<User> usersList = userService.list(page, size);
-		logger.info("USERS LIST :: " + usersList);
 
-		if (usersList.getContent() == null) {
+		if (usersList.isEmpty()) {
+			logger.info("NO USERS FOUND");
 			return new ResponseEntity<Page<User>>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<Page<User>>(usersList, HttpStatus.OK);

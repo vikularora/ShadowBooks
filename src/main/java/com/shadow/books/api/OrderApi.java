@@ -55,6 +55,27 @@ public class OrderApi {
 		return new ResponseEntity<Order>(result, HttpStatus.NO_CONTENT);
 	}
 
+	// for testing failed flow
+
+//	@CrossOrigin
+//	@PostMapping()
+//	public ResponseEntity<Order> add(@RequestBody Order order) throws Exception {
+//
+//		logger.info("CALLING ORDER ADD :: " + order);
+//		Order result = orderService.add(order);
+//
+//		if (result != null) {
+//			if (result.getStatus().equalsIgnoreCase(DBConstants.PENDING)) {
+//
+//				return new ResponseEntity<Order>(result, HttpStatus.NO_CONTENT);
+//			} else {
+//
+//				return new ResponseEntity<Order>(result, HttpStatus.NO_CONTENT);
+//			}
+//		}
+//		return new ResponseEntity<Order>(result, HttpStatus.NO_CONTENT);
+//	}
+
 	@CrossOrigin
 	@PutMapping("{id}/address")
 	public ResponseEntity<Optional<Order>> updateOrders(@RequestBody Address address,
