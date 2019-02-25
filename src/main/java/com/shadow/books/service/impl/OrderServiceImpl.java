@@ -236,9 +236,11 @@ public class OrderServiceImpl implements OrderService {
 
 		orderedItems.forEach(orderedItem -> {
 			Optional<Item> optItem = itemRepository.findById(orderedItem.getProductId());
-			orderedItem.setName(optItem.get().getName());
-			orderedItem.setLanguage(optItem.get().getLanguage());
-			orderedItem.setImageUrl(optItem.get().getImageUrl());
+			if (optItem.isPresent()) {
+//				orderedItem.setName(optItem.get().getName());
+				orderedItem.setLanguage(optItem.get().getLanguage());
+				orderedItem.setImageUrl(optItem.get().getImageUrl());
+			}
 		});
 		return orderedItems;
 	}
@@ -248,7 +250,7 @@ public class OrderServiceImpl implements OrderService {
 		if (status.isEmpty()) {
 			return orderRepository.findAll(pageable);
 		}
-		return orderRepository.findByStatus(status, pageable);
+		return orderRepository.findByStatusOrderByIdDesc(status, pageable);
 	}
 
 }

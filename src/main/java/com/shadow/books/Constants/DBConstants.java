@@ -3,8 +3,8 @@ package com.shadow.books.Constants;
 public class DBConstants {
 
 	// FILE DIRECTORY
-	public static final String UPLOAD_DIRECTORY_PATH = "/home/ubuntu/shadow-images";
-//	public static final String UPLOAD_DIRECTORY_PATH = "/home/vikul/Desktop/shadow-images";
+	public static final String UPLOAD_DIRECTORY_PATH = "/home/ubuntu/shadow-images";		// for Server
+//	public static final String UPLOAD_DIRECTORY_PATH = "/home/vikul/Desktop/shadow-images"; // for Local
 	public static final String IMAGE_PATH = "/items/picture?imgPath=";
 
 	// LANGUAGES

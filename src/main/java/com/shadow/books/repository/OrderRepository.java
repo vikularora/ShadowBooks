@@ -13,7 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 //	Page<Order> findByUserIdAndStatusNotInIgnoreCase(long userId, String status, Pageable page);
 
 	
-	Page<Order> findByStatus(String status, Pageable page);
+	Page<Order> findByStatusOrderByIdDesc(String status, Pageable page);
 
 //	Page<Order> findByUserId(Long userId, Pageable page);
 
