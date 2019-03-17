@@ -20,9 +20,9 @@ public class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	@Column(nullable = false)
 	private String name;
+	private String email;
 
 	@Column(nullable = false, unique = true)
 	private String contactNo;
@@ -80,11 +80,18 @@ public class User implements Serializable {
 		this.modifiedOn = modifiedOn;
 	}
 
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", contactNo=" + contactNo + ", deleted=" + deleted
-				+ ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+	public String getEmail() {
+		return email;
 	}
 
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", contactNo=" + contactNo + ", deleted="
+				+ deleted + ", createdOn=" + createdOn + ", modifiedOn=" + modifiedOn + "]";
+	}
 
 }

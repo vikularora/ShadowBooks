@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shadow.books.Constants.DBConstants;
 import com.shadow.books.dto.ApplicationDetailsDto;
 import com.shadow.books.service.UserService;
 
@@ -26,8 +27,8 @@ public class ApplicationUrl {
 
 		logger.info("Get APPLICATION URL");
 		ApplicationDetailsDto applicationDetails = new ApplicationDetailsDto();
-		applicationDetails.setBody("I'm inviting you to use ShadowBooks, an online book store app.");
-		applicationDetails.setLink("https://www.youtube.com/watch?v=P9Z6okLJDv0");
+		applicationDetails.setBody(DBConstants.INVITE_MESSAGE);
+		applicationDetails.setLink(DBConstants.APP_LINK);
 		return new ResponseEntity<ApplicationDetailsDto>(applicationDetails, HttpStatus.OK);
 
 	}

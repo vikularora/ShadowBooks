@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.shadow.books.Constants.DBConstants;
 import com.shadow.books.domain.Item;
@@ -110,11 +114,20 @@ public class ItemApi {
 //		});
 //		return new ResponseEntity<JSONArray>(jsonArray, HttpStatus.OK);
 //	}
-
+	
+	
 	@GetMapping("category/{cat}")
 	private ResponseEntity<List<ItemDto>> listByCategory(@PathVariable(name = "cat", required = true) String cat,
 			@RequestParam(required = false, name = "size", defaultValue = "5") int size,
 			@RequestParam(required = false, name = "page", defaultValue = "0") int page) {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                .getRequest();
+		logger.info("request is :"+request.toString());
+		logger.info("REQUEST.GETREQUESTURI is :"+request.getRequestURI());
+		logger.info("REQUEST.GETHEADER(\"USER-AGENT\")is :"+request.getHeader("User-Agent"));
+		logger.info("REQUEST.GETHEADER(\"X-Forwarded-For\")is :"+request.getHeader("The X-Forwarded-For"));
+		logger.info("REQUEST.GETREMOTEADDR is :"+request.getRemoteAddr());
+
 
 		List<ItemDto> list = new ArrayList<ItemDto>();
 		Pageable pageable = PageRequest.of(page, size);

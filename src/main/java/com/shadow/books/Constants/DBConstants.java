@@ -26,4 +26,8 @@ public class DBConstants {
 	// QUERIES
 	public static final String UPDATE_STATUS_AND_ORDERID ="update LineItem li set li.status= 'Pending', li.orderId=:orderId where li.status='InCart' and li.userId = :userId";
 	public static final String SET_DELETED = "update LineItem li set li.deleted= 1 where li.productId = :productId";
+	
+	// app url 
+	public static final String INVITE_MESSAGE = "I'm inviting you to use ShadowBook, an online book store app.";
+	public static final String APP_LINK = "https://bit.ly/2XJBA0Q";
 }
